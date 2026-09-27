@@ -54,6 +54,24 @@ void ConfigManager::read() {
             time_list_file.close();
         }
 
+        QFile event_point_list_file("event_point_list.txt");
+        // 格式：时间;事件名称;持续时间（秒）
+        if (event_point_list_file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            event_point.event_point_list.clear();
+            while (!event_point_list_file.atEnd()) {
+                QString line = event_point_list_file.readLine().trimmed();
+                if (line.isEmpty()) continue;
+                QStringList parts = line.split(';');
+                if (parts.size() == 3) {
+                    QTime time = QTime::fromString(parts[0], "HH:mm:ss");
+                    QString name = parts[1];
+                    int duration = parts[2].toInt();
+                    event_point.event_point_list.append(EventPoint(time, name, duration));
+                }
+            }
+            event_point_list_file.close();
+        }
+
         qInfo() << "配置文件读取成功";
     }
 }
@@ -95,6 +113,15 @@ void ConfigManager::write() {
             out << time.toString("HH:mm:ss") << Qt::endl;
         }
         time_list_file.close();
+    }
+
+    QFile event_point_list_file("event_point_list.txt");
+    if (event_point_list_file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&event_point_list_file);
+        for (const EventPoint& event_point_item : event_point.event_point_list) {
+            out << event_point_item.time().toString("HH:mm:ss") << ";" << event_point_item.name() << ";" << event_point_item.advanceTime() << Qt::endl;
+        }
+        event_point_list_file.close();
     }
 
     if (Settings.status() != QSettings::NoError) {

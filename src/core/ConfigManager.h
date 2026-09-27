@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EventPoint.h"
+
 #include <QDateTime>
 #include <QSettings>
 
@@ -40,6 +42,10 @@ private:
         QList<QTime> reminder_time_list = { QTime(8, 13), QTime(9, 3), QTime(9, 53), QTime(10, 43), QTime(11, 38), QTime(14, 20), QTime(15, 3), QTime(15, 53), QTime(16, 43), QTime(18, 3) }; // 时间列表
     };
 
+    struct EventPointConfigItems {
+        QList<EventPoint> event_point_list = { EventPoint(QTime(11, 55), "放学", 60), EventPoint(QTime(17, 40), "放学", 60), EventPoint(QTime(22, 0), "放学", 60) }; // 事件点列表
+    };
+
 
     QSettings Settings = QSettings("config.ini", QSettings::IniFormat);
 
@@ -53,6 +59,8 @@ public:
     FloatingBarConfigItems floating_bar;
 
     ReminderConfigItems reminder;
+
+    EventPointConfigItems event_point;
 
     template<typename T1, typename T2> void set(T1& item, const T2& variant) {
         item = variant;

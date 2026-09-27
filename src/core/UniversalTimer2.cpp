@@ -2,6 +2,7 @@
 #include "core/LogManager.h"
 #include "core/Global.h"
 #include "ui/DonatePage.h"
+#include "ui/EventPointReminder.h"
 
 #include <QApplication>
 #include <QScreen>
@@ -127,6 +128,15 @@ void UniversalTimer2::updateObjects() {
         QTime current_time = QTime::currentTime();
         if (config.reminder.reminder_time_list.contains(QTime(current_time.hour(), current_time.minute(), current_time.second()))) {
             FullscreenPages->showReminder();
+        }
+    }
+    // 定时显示事件点提醒
+    for (const EventPoint& event_point_item : config.event_point.event_point_list) {
+        QTime current_time = QTime::currentTime();
+        if (QTime(current_time.hour(), current_time.minute(), current_time.second()) == event_point_item.time().addSecs(-event_point_item.advanceTime() - 1)) {
+            EventPointReminder* event_point_reminder = new EventPointReminder(nullptr, event_point_item);
+            event_point_reminder->setAttribute(Qt::WA_DeleteOnClose);
+            event_point_reminder->show();
         }
     }
 }

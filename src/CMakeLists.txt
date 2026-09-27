@@ -27,6 +27,9 @@ set(PROJECT_SOURCES
     core/ConfigManager.h
     core/ConfigManager.cpp
     core/Global.h
+    core/EventPoint.h
+    ui/EventPointReminder.h
+    ui/EventPointReminder.cpp
     ui/FloatingBar.h
     ui/FloatingBar.cpp
     ui/FullscreenPagesManager.h
