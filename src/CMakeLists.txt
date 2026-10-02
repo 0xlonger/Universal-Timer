@@ -30,6 +30,8 @@ set(PROJECT_SOURCES
     core/EventPoint.h
     ui/EventPointReminder.h
     ui/EventPointReminder.cpp
+    ui/EventPointFullscreenReminder.h
+    ui/EventPointFullscreenReminder.cpp
     ui/FloatingBar.h
     ui/FloatingBar.cpp
     ui/FullscreenPagesManager.h

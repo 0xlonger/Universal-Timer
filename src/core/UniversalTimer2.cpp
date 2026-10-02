@@ -3,6 +3,7 @@
 #include "core/Global.h"
 #include "ui/DonatePage.h"
 #include "ui/EventPointReminder.h"
+#include "ui/EventPointFullscreenReminder.h"
 
 #include <QApplication>
 #include <QScreen>
@@ -136,6 +137,10 @@ void UniversalTimer2::updateObjects() {
         if (QTime(current_time.hour(), current_time.minute(), current_time.second()) == event_point_item.time().addSecs(-event_point_item.advanceTime() - 1)) {
             EventPointReminder* event_point_reminder = new EventPointReminder(nullptr, event_point_item);
             event_point_reminder->setAttribute(Qt::WA_DeleteOnClose);
+            connect(event_point_reminder, &EventPointReminder::reached, this, [this](const EventPoint& event_point, const QRect& capsule_geometry) {
+                EventPointFullscreenReminder* event_point_fullscreen_reminder = new EventPointFullscreenReminder(event_point, config.event_point.event_point_list, capsule_geometry);
+                event_point_fullscreen_reminder->start();
+                });
             event_point_reminder->show();
         }
     }

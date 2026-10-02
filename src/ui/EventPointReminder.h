@@ -18,6 +18,10 @@ class EventPointReminder : public QLabel
 public:
     explicit EventPointReminder(QWidget* parent, const EventPoint& eventPoint);
 
+Q_SIGNALS:
+
+    void reached(const EventPoint& eventPoint, const QRect& capsuleGeometry); // 到达事件点，交给全屏提醒继续播放
+
 
 private:
 

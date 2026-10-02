@@ -82,10 +82,14 @@ void EventPointReminder::updateLabel()
     QTime currentTime = QTime::currentTime();
     int remainingSeconds = currentTime.secsTo(m_eventPoint.time());
     if (remainingSeconds <= 0) {
-        m_label->setText(m_eventPoint.name());
-    } else {
-        m_label->setText(QString::number(remainingSeconds));
+        // 到达事件点：把胶囊当前位置交给全屏提醒，红线从这里开始
+        m_timer->stop();
+        emit reached(m_eventPoint, this->geometry());
+        this->hide();
+        this->deleteLater();
+        return;
     }
+    m_label->setText(QString::number(remainingSeconds));
     m_label->adjustSize();
     m_adjustAnimation->setStartValue(this->geometry());
     m_adjustAnimation->setEndValue(QRect((desktop.width() - m_label->width() / GOLDEN_RATIO_INV) / 2, desktop.height() * 0.1, m_label->width() / GOLDEN_RATIO_INV, this->height()));
@@ -93,13 +97,4 @@ void EventPointReminder::updateLabel()
     m_adjustLabelAnimation->setEndValue(QSize(m_label->width() / GOLDEN_RATIO_INV, this->height()));
     m_adjustAnimation->start();
     m_adjustLabelAnimation->start();
-    if (remainingSeconds <= -1) {
-        m_timer->stop();
-        m_fadeOutAnimation1->setStartValue(this->geometry());
-        m_fadeOutGroup->start();
-        connect(m_fadeOutGroup, &QSequentialAnimationGroup::finished, this, [this]() {
-            this->hide();
-            this->deleteLater();
-        });
-    }
 }
