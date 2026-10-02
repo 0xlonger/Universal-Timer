@@ -22,6 +22,10 @@ void EventPointReminder::setupUI()
     font.setFamilies({ "DIN1451", "Bahnschrift", "Barlow Condensed", "Arial Narrow" });
     font.setPixelSize(desktop.width() * 0.05 * GOLDEN_RATIO_INV);
     m_label->setFont(font);
+
+    m_opacityEffect = new QGraphicsOpacityEffect(m_label);
+    m_opacityEffect->setOpacity(1.0);
+    m_label->setGraphicsEffect(m_opacityEffect);
 }
 
 void EventPointReminder::setupAnimation()
@@ -54,6 +58,40 @@ void EventPointReminder::setupAnimation()
     m_adjustAnimation->setDuration(500);
     m_adjustAnimation->setEasingCurve(QEasingCurve::OutCubic);
 
+    m_countdownAnimation1 = new QVariantAnimation(m_label);
+    m_countdownAnimation1->setDuration(250);
+    m_countdownAnimation1->setEasingCurve(QEasingCurve::OutCubic);
+    m_countdownAnimation1->setStartValue(desktop.width() * 0.05);
+    m_countdownAnimation1->setEndValue(desktop.width() * 0.05 * GOLDEN_RATIO_INV);
+    connect(m_countdownAnimation1, &QVariantAnimation::valueChanged, this, [this](const QVariant &value) {
+        QFont font = m_label->font();
+        font.setPixelSize(value.toInt());
+        m_label->setFont(font);
+    });
+
+    m_countdownAnimation2 = new QVariantAnimation(m_label);
+    m_countdownAnimation2->setDuration(250);
+    m_countdownAnimation2->setEasingCurve(QEasingCurve::InCubic);
+    m_countdownAnimation2->setStartValue(desktop.width() * 0.05 * GOLDEN_RATIO_INV);
+    m_countdownAnimation2->setEndValue(desktop.width() * 0.05 * GOLDEN_RATIO_INV * GOLDEN_RATIO_INV);
+    connect(m_countdownAnimation2, &QVariantAnimation::valueChanged, this, [this](const QVariant &value) {
+        QFont font = m_label->font();
+        font.setPixelSize(value.toInt());
+        m_label->setFont(font);
+    });
+
+    m_countdownOpacityAnimation1 = new QPropertyAnimation(m_opacityEffect, "opacity");
+    m_countdownOpacityAnimation1->setDuration(250);
+    m_countdownOpacityAnimation1->setEasingCurve(QEasingCurve::OutCubic);
+    m_countdownOpacityAnimation1->setStartValue(0.0);
+    m_countdownOpacityAnimation1->setEndValue(1.0);
+
+    m_countdownOpacityAnimation2 = new QPropertyAnimation(m_opacityEffect, "opacity");
+    m_countdownOpacityAnimation2->setDuration(250);
+    m_countdownOpacityAnimation2->setEasingCurve(QEasingCurve::InCubic);
+    m_countdownOpacityAnimation2->setStartValue(1.0);
+    m_countdownOpacityAnimation2->setEndValue(0.0);
+
     m_fadeInGroup = new QSequentialAnimationGroup(this);
     m_fadeInGroup->addAnimation(m_fadeInAnimation1);
     m_fadeInGroup->addAnimation(m_fadeInAnimation2);
@@ -61,6 +99,19 @@ void EventPointReminder::setupAnimation()
     m_fadeOutGroup = new QSequentialAnimationGroup(this);
     m_fadeOutGroup->addAnimation(m_fadeOutAnimation1);
     m_fadeOutGroup->addAnimation(m_fadeOutAnimation2);
+
+    m_countdownGroup1 = new QParallelAnimationGroup(this);
+    m_countdownGroup1->addAnimation(m_countdownAnimation1);
+    m_countdownGroup1->addAnimation(m_countdownOpacityAnimation1);
+
+    m_countdownGroup2 = new QParallelAnimationGroup(this);
+    m_countdownGroup2->addAnimation(m_countdownAnimation2);
+    m_countdownGroup2->addAnimation(m_countdownOpacityAnimation2);
+
+    m_countdownGroup = new QSequentialAnimationGroup(this);
+    m_countdownGroup->addAnimation(m_countdownGroup1);
+    m_countdownGroup->addPause(500);
+    m_countdownGroup->addAnimation(m_countdownGroup2);
 }
 
 void EventPointReminder::showReminder()
@@ -92,6 +143,7 @@ void EventPointReminder::updateLabel()
     m_adjustAnimation->setStartValue(this->geometry());
     m_adjustAnimation->setEndValue(QRect((desktop.width() - ((labelWidth + 30) > (desktop.width() * 0.05) ? (labelWidth + 30) : (desktop.width() * 0.05))) / 2, desktop.height() * 0.1, (labelWidth + 30) > (desktop.width() * 0.05) ? (labelWidth + 30) : (desktop.width() * 0.05), this->height()));
     m_adjustAnimation->start();
+    m_countdownGroup->start();
 }
 
 void EventPointReminder::resizeEvent(QResizeEvent* event)

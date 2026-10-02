@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <QPropertyAnimation>
 #include <QVariantAnimation>
+#include <QParallelAnimationGroup>
 #include <QSequentialAnimationGroup>
 #include <QGraphicsOpacityEffect>
 #include <QApplication>
@@ -45,8 +46,16 @@ private:
     QPropertyAnimation* m_fadeOutAnimation2;
     QPropertyAnimation* m_adjustAnimation;
 
+    QVariantAnimation* m_countdownAnimation1;
+    QVariantAnimation* m_countdownAnimation2;
+    QPropertyAnimation* m_countdownOpacityAnimation1;
+    QPropertyAnimation* m_countdownOpacityAnimation2;
+
     QSequentialAnimationGroup* m_fadeInGroup;
     QSequentialAnimationGroup* m_fadeOutGroup;
+    QParallelAnimationGroup* m_countdownGroup1;
+    QParallelAnimationGroup* m_countdownGroup2;
+    QSequentialAnimationGroup* m_countdownGroup;
 
 
     void setupUI();
