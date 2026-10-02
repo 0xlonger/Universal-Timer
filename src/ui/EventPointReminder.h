@@ -10,6 +10,7 @@
 #include <QGraphicsOpacityEffect>
 #include <QApplication>
 #include <QScreen>
+#include <QResizeEvent>
 
 class EventPointReminder : public QLabel
 {
@@ -17,6 +18,10 @@ class EventPointReminder : public QLabel
 
 public:
     explicit EventPointReminder(QWidget* parent, const EventPoint& eventPoint);
+
+protected:
+
+    void resizeEvent(QResizeEvent* event) override;
 
 Q_SIGNALS:
 
@@ -39,7 +44,6 @@ private:
     QPropertyAnimation* m_fadeOutAnimation1;
     QPropertyAnimation* m_fadeOutAnimation2;
     QPropertyAnimation* m_adjustAnimation;
-    QPropertyAnimation* m_adjustLabelAnimation;
 
     QSequentialAnimationGroup* m_fadeInGroup;
     QSequentialAnimationGroup* m_fadeOutGroup;

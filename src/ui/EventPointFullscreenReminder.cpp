@@ -178,8 +178,8 @@ EventPointFullscreenReminder::EventPointFullscreenReminder(const EventPoint& eve
     m_exit = m_flashTimes > 0 ? PULSE_START + (m_flashTimes - 1) * PULSE_GAP + FLASH_ON + 800 : PULSE_START + 2500;
     m_end = m_exit + 1000;
 
-    m_countdownSound = new QSoundEffect(this);
-    m_countdownSound->setSource(QUrl::fromLocalFile("./sounds/countdown.wav"));
+    //m_countdownSound = new QSoundEffect(this);
+    //m_countdownSound->setSource(QUrl::fromLocalFile("./sounds/countdown.wav"));
 
     // 整个动画只有这一条时间轴，每个图层在 paintEvent 里按 m_t 算自己的进度
     m_timeline = new QVariantAnimation(this);
@@ -192,7 +192,7 @@ EventPointFullscreenReminder::EventPointFullscreenReminder(const EventPoint& eve
         for (int i = 0; i < m_flashTimes; i++) {
             const qreal pulse = PULSE_START + i * PULSE_GAP;
             // 只在正常经过时播放，点击跳到收尾时不会连响
-            if (previous < pulse && m_t >= pulse && m_t - pulse < 200) m_countdownSound->play();
+            //if (previous < pulse && m_t >= pulse && m_t - pulse < 200) m_countdownSound->play();
         }
         this->update();
         });

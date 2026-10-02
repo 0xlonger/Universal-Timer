@@ -33,7 +33,7 @@ public:
     explicit EventPointFullscreenReminder(const EventPoint& eventPoint,
                                           const QList<EventPoint>& eventPointList = {},
                                           const QRect& capsuleGeometry = QRect(),
-                                          int flashTimes = 3,
+                                          int flashTimes = 4,
                                           QWidget* parent = nullptr);
 
     void start();                 // 显示并从 0 开始播放
@@ -86,5 +86,5 @@ private:
     qreal m_cx = 0, m_cy = 0;
 
     QVariantAnimation* m_timeline;
-    QSoundEffect* m_countdownSound;
+    //QSoundEffect* m_countdownSound;
 };

@@ -19,6 +19,7 @@ void EventPointReminder::setupUI()
     m_label = new QLabel(this);
     m_label->setAlignment(Qt::AlignCenter);
     QFont font;
+    font.setFamilies({ "DIN1451", "Bahnschrift", "Barlow Condensed", "Arial Narrow" });
     font.setPixelSize(desktop.width() * 0.05 * GOLDEN_RATIO_INV);
     m_label->setFont(font);
 }
@@ -53,10 +54,6 @@ void EventPointReminder::setupAnimation()
     m_adjustAnimation->setDuration(500);
     m_adjustAnimation->setEasingCurve(QEasingCurve::OutCubic);
 
-    m_adjustLabelAnimation = new QPropertyAnimation(m_label, "size");
-    m_adjustLabelAnimation->setDuration(500);
-    m_adjustLabelAnimation->setEasingCurve(QEasingCurve::OutCubic);
-
     m_fadeInGroup = new QSequentialAnimationGroup(this);
     m_fadeInGroup->addAnimation(m_fadeInAnimation1);
     m_fadeInGroup->addAnimation(m_fadeInAnimation2);
@@ -90,11 +87,17 @@ void EventPointReminder::updateLabel()
         return;
     }
     m_label->setText(QString::number(remainingSeconds));
-    m_label->adjustSize();
+    // 只量出文字需要的宽度，不改 m_label 的大小（它始终铺满胶囊，见 resizeEvent）
+    const int labelWidth = m_label->sizeHint().width();
     m_adjustAnimation->setStartValue(this->geometry());
-    m_adjustAnimation->setEndValue(QRect((desktop.width() - m_label->width() / GOLDEN_RATIO_INV) / 2, desktop.height() * 0.1, m_label->width() / GOLDEN_RATIO_INV, this->height()));
-    m_adjustLabelAnimation->setStartValue(this->size());
-    m_adjustLabelAnimation->setEndValue(QSize(m_label->width() / GOLDEN_RATIO_INV, this->height()));
+    m_adjustAnimation->setEndValue(QRect((desktop.width() - ((labelWidth + 30) > (desktop.width() * 0.05) ? (labelWidth + 30) : (desktop.width() * 0.05))) / 2, desktop.height() * 0.1, (labelWidth + 30) > (desktop.width() * 0.05) ? (labelWidth + 30) : (desktop.width() * 0.05), this->height()));
     m_adjustAnimation->start();
-    m_adjustLabelAnimation->start();
+}
+
+void EventPointReminder::resizeEvent(QResizeEvent* event)
+{
+    QLabel::resizeEvent(event);
+    // 胶囊本身设置了 WA_TranslucentBackground，Qt 不会绘制它自己的样式表背景和红边，
+    // 屏幕上看到的黑底红边其实是 m_label。让 m_label 始终铺满胶囊，展开和宽度变化的动画才能完整显示
+    m_label->setGeometry(this->rect());
 }
