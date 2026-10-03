@@ -12,6 +12,7 @@
 #include <QApplication>
 #include <QScreen>
 #include <QResizeEvent>
+#include <QPaintEvent>
 
 class EventPointReminder : public QLabel
 {
@@ -23,6 +24,7 @@ public:
 protected:
 
     void resizeEvent(QResizeEvent* event) override;
+    void paintEvent(QPaintEvent* event) override;
 
 Q_SIGNALS:
 

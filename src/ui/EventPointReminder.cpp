@@ -1,6 +1,8 @@
 #include "EventPointReminder.h"
 #include "../core/Global.h"
 
+#include <QPainter>
+
 EventPointReminder::EventPointReminder(QWidget* parent, const EventPoint& eventPoint)
     : QLabel(parent), m_eventPoint(eventPoint)
 {
@@ -11,7 +13,7 @@ EventPointReminder::EventPointReminder(QWidget* parent, const EventPoint& eventP
 
 void EventPointReminder::setupUI()
 {
-    this->setStyleSheet("background-color: rgba(0, 0, 0, 0.75); color: white; border-left: 5px solid red; border-right: 5px solid red;");
+    this->setStyleSheet("color: white;");
     this->setAlignment(Qt::AlignCenter);
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool);
     this->setAttribute(Qt::WA_TranslucentBackground);
@@ -138,11 +140,15 @@ void EventPointReminder::updateLabel()
         return;
     }
     m_label->setText(QString::number(remainingSeconds));
+    QFont font = m_label->font();
+    font.setPixelSize(desktop.width() * 0.05 * GOLDEN_RATIO_INV);
+    m_label->setFont(font);
     // 只量出文字需要的宽度，不改 m_label 的大小（它始终铺满胶囊，见 resizeEvent）
     const int labelWidth = m_label->sizeHint().width();
     m_adjustAnimation->setStartValue(this->geometry());
     m_adjustAnimation->setEndValue(QRect((desktop.width() - ((labelWidth + 30) > (desktop.width() * 0.05) ? (labelWidth + 30) : (desktop.width() * 0.05))) / 2, desktop.height() * 0.1, (labelWidth + 30) > (desktop.width() * 0.05) ? (labelWidth + 30) : (desktop.width() * 0.05), this->height()));
     m_adjustAnimation->start();
+    m_countdownGroup->stop();
     m_countdownGroup->start();
 }
 
@@ -152,4 +158,13 @@ void EventPointReminder::resizeEvent(QResizeEvent* event)
     // 胶囊本身设置了 WA_TranslucentBackground，Qt 不会绘制它自己的样式表背景和红边，
     // 屏幕上看到的黑底红边其实是 m_label。让 m_label 始终铺满胶囊，展开和宽度变化的动画才能完整显示
     m_label->setGeometry(this->rect());
+}
+
+void EventPointReminder::paintEvent(QPaintEvent* event)
+{
+    Q_UNUSED(event);
+    QPainter painter(this);
+    painter.fillRect(this->rect(), QColor(0, 0, 0, 191)); // 半透明黑色背景
+    painter.fillRect(QRect(0, 0, 5, this->height()), QColor(255, 0, 0)); // 左红边
+    painter.fillRect(QRect(this->width() - 5, 0, 5, this->height()), QColor(255, 0, 0)); // 右红边
 }
