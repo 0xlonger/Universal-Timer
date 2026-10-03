@@ -19,7 +19,7 @@ class EventPointReminder : public QLabel
     Q_OBJECT
 
 public:
-    explicit EventPointReminder(QWidget* parent, const EventPoint& eventPoint);
+    explicit EventPointReminder(QWidget* parent, EventPoint& eventPoint);
 
 protected:
 
@@ -28,7 +28,7 @@ protected:
 
 Q_SIGNALS:
 
-    void reached(const EventPoint& eventPoint, const QRect& capsuleGeometry); // 到达事件点，交给全屏提醒继续播放
+    void reached(EventPoint& eventPoint, const QRect& capsuleGeometry); // 到达事件点，交给全屏提醒继续播放
 
 
 private:
@@ -37,7 +37,7 @@ private:
 
     QLabel* m_label;
 
-    EventPoint m_eventPoint;
+    EventPoint& m_eventPoint;
     QTimer* m_timer;
     QPropertyAnimation* m_animation;
     QGraphicsOpacityEffect* m_opacityEffect;

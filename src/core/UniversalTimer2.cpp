@@ -49,7 +49,7 @@ UniversalTimer2::UniversalTimer2(QObject* parent)
         EventPoint test_event_point(QTime::currentTime().addSecs(16), tr("测试"), 15, 4);
         EventPointReminder* event_point_reminder = new EventPointReminder(nullptr, test_event_point);
         event_point_reminder->setAttribute(Qt::WA_DeleteOnClose);
-        connect(event_point_reminder, &EventPointReminder::reached, this, [this](const EventPoint& event_point, const QRect& capsule_geometry) {
+        connect(event_point_reminder, &EventPointReminder::reached, this, [this](EventPoint& event_point, const QRect& capsule_geometry) {
             EventPointFullscreenReminder* event_point_fullscreen_reminder = new EventPointFullscreenReminder(event_point, config.event_point.event_point_list, capsule_geometry, event_point.flashTimes());
             event_point_fullscreen_reminder->start();
             });
@@ -147,12 +147,12 @@ void UniversalTimer2::updateObjects() {
         }
     }
     // 定时显示事件点提醒
-    for (const EventPoint& event_point_item : config.event_point.event_point_list) {
+    for (EventPoint& event_point_item : config.event_point.event_point_list) {
         QTime current_time = QTime::currentTime();
         if (QTime(current_time.hour(), current_time.minute(), current_time.second()) == event_point_item.time().addSecs(-event_point_item.advanceTime() - 1) && !event_point_item.isShowing()) {
             EventPointReminder* event_point_reminder = new EventPointReminder(nullptr, event_point_item);
             event_point_reminder->setAttribute(Qt::WA_DeleteOnClose);
-            connect(event_point_reminder, &EventPointReminder::reached, this, [this](const EventPoint& event_point, const QRect& capsule_geometry) {
+            connect(event_point_reminder, &EventPointReminder::reached, this, [this](EventPoint& event_point, const QRect& capsule_geometry) {
                 EventPointFullscreenReminder* event_point_fullscreen_reminder = new EventPointFullscreenReminder(event_point, config.event_point.event_point_list, capsule_geometry, event_point.flashTimes());
                 event_point_fullscreen_reminder->start();
                 });

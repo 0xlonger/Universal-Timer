@@ -157,7 +157,7 @@ HudFrame hudFrame(qreal unit, qreal width)
 
 } // namespace
 
-EventPointFullscreenReminder::EventPointFullscreenReminder(const EventPoint& eventPoint,
+EventPointFullscreenReminder::EventPointFullscreenReminder(EventPoint& eventPoint,
                                                            const QList<EventPoint>& eventPointList,
                                                            const QRect& capsuleGeometry,
                                                            int flashTimes,
