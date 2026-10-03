@@ -41,7 +41,22 @@ UniversalTimer2::UniversalTimer2(QObject* parent)
         DonatePage->show();
         });
     TrayIcon->contextMenu()->addAction(tr("关于"), AboutPage, &AboutPageClass::showNormal);
+    TrayIcon->contextMenu()->addSeparator();
     TrayIcon->contextMenu()->addAction(tr("刷新"), this, &UniversalTimer2::refresh); // 系统托盘菜单项：刷新
+    TrayIcon->contextMenu()->addAction(tr("立即播报全屏提醒"), FullscreenPages, &FullscreenPagesManager::showReminder); // 系统托盘菜单项：立即播报全屏提醒
+#ifdef QT_DEBUG
+    TrayIcon->contextMenu()->addAction(tr("[DEBUG] 事件点提醒测试（提前15秒，闪烁4次）"), this, [this]() {
+        EventPoint test_event_point(QTime::currentTime().addSecs(16), tr("测试"), 15, 4);
+        EventPointReminder* event_point_reminder = new EventPointReminder(nullptr, test_event_point);
+        event_point_reminder->setAttribute(Qt::WA_DeleteOnClose);
+        connect(event_point_reminder, &EventPointReminder::reached, this, [this](const EventPoint& event_point, const QRect& capsule_geometry) {
+            EventPointFullscreenReminder* event_point_fullscreen_reminder = new EventPointFullscreenReminder(event_point, config.event_point.event_point_list, capsule_geometry, event_point.flashTimes());
+            event_point_fullscreen_reminder->start();
+            });
+        event_point_reminder->show();
+        });
+#endif
+    TrayIcon->contextMenu()->addSeparator();
     TrayIcon->contextMenu()->addAction(tr("退出"), this, &qApp->quit); // 系统托盘菜单项：退出
     TrayIcon->show();
 
