@@ -197,6 +197,7 @@ EventPointFullscreenReminder::EventPointFullscreenReminder(const EventPoint& eve
         this->update();
         });
     connect(m_timeline, &QVariantAnimation::finished, this, [this] {
+        m_eventPoint.setShowing(false);
         emit finished();
         this->close();
         });

@@ -149,7 +149,7 @@ void UniversalTimer2::updateObjects() {
     // 定时显示事件点提醒
     for (const EventPoint& event_point_item : config.event_point.event_point_list) {
         QTime current_time = QTime::currentTime();
-        if (QTime(current_time.hour(), current_time.minute(), current_time.second()) == event_point_item.time().addSecs(-event_point_item.advanceTime() - 1)) {
+        if (QTime(current_time.hour(), current_time.minute(), current_time.second()) == event_point_item.time().addSecs(-event_point_item.advanceTime() - 1) && !event_point_item.isShowing()) {
             EventPointReminder* event_point_reminder = new EventPointReminder(nullptr, event_point_item);
             event_point_reminder->setAttribute(Qt::WA_DeleteOnClose);
             connect(event_point_reminder, &EventPointReminder::reached, this, [this](const EventPoint& event_point, const QRect& capsule_geometry) {

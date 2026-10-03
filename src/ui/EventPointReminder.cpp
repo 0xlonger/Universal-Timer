@@ -6,6 +6,7 @@
 EventPointReminder::EventPointReminder(QWidget* parent, const EventPoint& eventPoint)
     : QLabel(parent), m_eventPoint(eventPoint)
 {
+    m_eventPoint.setShowing(true);
     setupUI();
     setupAnimation();
     showReminder();
