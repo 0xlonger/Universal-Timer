@@ -157,7 +157,7 @@ HudFrame hudFrame(qreal unit, qreal width)
 
 } // namespace
 
-EventPointFullscreenReminder::EventPointFullscreenReminder(EventPoint& eventPoint,
+EventPointFullscreenReminder::EventPointFullscreenReminder(const EventPoint& eventPoint,
                                                            const QList<EventPoint>& eventPointList,
                                                            const QRect& capsuleGeometry,
                                                            int flashTimes,
@@ -197,8 +197,7 @@ EventPointFullscreenReminder::EventPointFullscreenReminder(EventPoint& eventPoin
         this->update();
         });
     connect(m_timeline, &QVariantAnimation::finished, this, [this] {
-        m_eventPoint.setShowing(false);
-        emit finished();
+        emit finished(m_eventPoint);
         this->close();
         });
 }

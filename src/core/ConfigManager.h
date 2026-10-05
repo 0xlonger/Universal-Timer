@@ -43,7 +43,7 @@ private:
     };
 
     struct EventPointConfigItems {
-        QList<EventPoint> event_point_list = { EventPoint(QTime(11, 55), "放学", 60), EventPoint(QTime(17, 40), "放学", 60), EventPoint(QTime(22, 0), "放学", 60) }; // 事件点列表
+        QList<EventPoint> event_point_list = { EventPoint(0, QTime(11, 55), "放学", 60), EventPoint(1, QTime(17, 40), "放学", 60), EventPoint(2, QTime(22, 0), "放学", 60) }; // 事件点列表
     };
 
 

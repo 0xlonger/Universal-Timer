@@ -46,10 +46,10 @@ UniversalTimer2::UniversalTimer2(QObject* parent)
     TrayIcon->contextMenu()->addAction(tr("立即播报全屏提醒"), FullscreenPages, &FullscreenPagesManager::showReminder); // 系统托盘菜单项：立即播报全屏提醒
 #ifdef QT_DEBUG
     TrayIcon->contextMenu()->addAction(tr("[DEBUG] 事件点提醒测试（提前15秒，闪烁4次）"), this, [this]() {
-        EventPoint test_event_point(QTime::currentTime().addSecs(16), tr("测试"), 15, 4);
+        EventPoint test_event_point(0x3f3f3f3f, QTime::currentTime().addSecs(16), tr("测试"), 15, 4);
         EventPointReminder* event_point_reminder = new EventPointReminder(nullptr, test_event_point);
         event_point_reminder->setAttribute(Qt::WA_DeleteOnClose);
-        connect(event_point_reminder, &EventPointReminder::reached, this, [this](EventPoint& event_point, const QRect& capsule_geometry) {
+        connect(event_point_reminder, &EventPointReminder::reached, this, [this](const EventPoint& event_point, const QRect& capsule_geometry) {
             EventPointFullscreenReminder* event_point_fullscreen_reminder = new EventPointFullscreenReminder(event_point, config.event_point.event_point_list, capsule_geometry, event_point.flashTimes());
             event_point_fullscreen_reminder->start();
             });
@@ -150,12 +150,21 @@ void UniversalTimer2::updateObjects() {
     for (EventPoint& event_point_item : config.event_point.event_point_list) {
         QTime current_time = QTime::currentTime();
         if (QTime(current_time.hour(), current_time.minute(), current_time.second()) == event_point_item.time().addSecs(-event_point_item.advanceTime() - 1) && !event_point_item.isShowing()) {
+            event_point_item.setShowing(true);
             EventPointReminder* event_point_reminder = new EventPointReminder(nullptr, event_point_item);
             event_point_reminder->setAttribute(Qt::WA_DeleteOnClose);
-            connect(event_point_reminder, &EventPointReminder::reached, this, [this](EventPoint& event_point, const QRect& capsule_geometry) {
+            connect(event_point_reminder, &EventPointReminder::reached, this, [this](const EventPoint& event_point, const QRect& capsule_geometry) {
                 EventPointFullscreenReminder* event_point_fullscreen_reminder = new EventPointFullscreenReminder(event_point, config.event_point.event_point_list, capsule_geometry, event_point.flashTimes());
-                event_point_fullscreen_reminder->start();
+                connect(event_point_fullscreen_reminder, &EventPointFullscreenReminder::finished, this, [this](const EventPoint& event_point) {
+                    for (EventPoint& event_point_item : config.event_point.event_point_list) {
+                        if (event_point_item.id() == event_point.id()) {
+                            event_point_item.setShowing(false);
+                            break;
+                        }
+                    }
                 });
+                event_point_fullscreen_reminder->start();
+            });
             event_point_reminder->show();
         }
     }

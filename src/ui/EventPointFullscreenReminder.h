@@ -30,7 +30,7 @@ class EventPointFullscreenReminder : public QWidget
 public:
     // capsuleGeometry：EventPointReminder 胶囊在屏幕上的位置，作为红线的起点；为空时用默认位置
     // flashTimes：闪烁 / 提示音次数，0 表示不闪烁，停留 2.5 秒
-    explicit EventPointFullscreenReminder(EventPoint& eventPoint,
+    explicit EventPointFullscreenReminder(const EventPoint& eventPoint,
                                           const QList<EventPoint>& eventPointList = {},
                                           const QRect& capsuleGeometry = QRect(),
                                           int flashTimes = 4,
@@ -41,7 +41,7 @@ public:
     qreal totalDuration() const;  // 从 0 到完全淡出的时长
 
 Q_SIGNALS:
-    void finished();
+    void finished(const EventPoint& eventPoint); // 全屏提醒播放完毕，交给主窗口
 
 protected:
     void paintEvent(QPaintEvent* event) override;
@@ -70,7 +70,7 @@ private:
     void drawTexts(QPainter& painter, qreal t, const Layout& lay) const;
     void drawHud(QPainter& painter, qreal t) const;
 
-    EventPoint& m_eventPoint;
+    const EventPoint m_eventPoint;
     QList<EventPoint> m_eventPointList;
     QRect m_capsuleGeometry;  // 屏幕坐标
     int m_flashTimes;

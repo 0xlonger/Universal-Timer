@@ -55,19 +55,20 @@ void ConfigManager::read() {
         }
 
         QFile event_point_list_file("event_point_list.txt");
-        // 格式：时间;事件名称;提前时间（秒）;闪烁次数
+        // 格式：ID;时间;事件名称;提前时间（秒）;闪烁次数
         if (event_point_list_file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             event_point.event_point_list.clear();
             while (!event_point_list_file.atEnd()) {
                 QString line = event_point_list_file.readLine().trimmed();
                 if (line.isEmpty()) continue;
                 QStringList parts = line.split(';');
-                if (parts.size() == 4) {
-                    QTime time = QTime::fromString(parts[0], "HH:mm:ss");
-                    QString name = parts[1];
-                    int advanceTime = parts[2].toInt();
-                    unsigned flashTimes = parts[3].toUInt();
-                    event_point.event_point_list.append(EventPoint(time, name, advanceTime, flashTimes));
+                if (parts.size() == 5) {
+                    int id = parts[0].toInt();
+                    QTime time = QTime::fromString(parts[1], "HH:mm:ss");
+                    QString name = parts[2];
+                    int advanceTime = parts[3].toInt();
+                    unsigned flashTimes = parts[4].toUInt();
+                    event_point.event_point_list.append(EventPoint(id, time, name, advanceTime, flashTimes));
                 }
             }
             event_point_list_file.close();
@@ -120,7 +121,7 @@ void ConfigManager::write() {
     if (event_point_list_file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&event_point_list_file);
         for (const EventPoint& event_point_item : event_point.event_point_list) {
-            out << event_point_item.time().toString("HH:mm:ss") << ";" << event_point_item.name() << ";" << event_point_item.advanceTime() << ";" << event_point_item.flashTimes() << Qt::endl;
+            out  << event_point_item.id() << ";" << event_point_item.time().toString("HH:mm:ss") << ";" << event_point_item.name() << ";" << event_point_item.advanceTime() << ";" << event_point_item.flashTimes() << Qt::endl;
         }
         event_point_list_file.close();
     }
