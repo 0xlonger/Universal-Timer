@@ -121,6 +121,7 @@ void EventPointReminder::showReminder()
     this->show();
     m_fadeInGroup->start();
     m_timer = new QTimer(this);
+    m_timer->setTimerType(Qt::PreciseTimer);
     m_timer->start(1000);
     connect(m_timer, &QTimer::timeout, this, [this]() {
         updateLabel();
@@ -129,8 +130,8 @@ void EventPointReminder::showReminder()
 
 void EventPointReminder::updateLabel()
 {
-    QTime currentTime = QTime::currentTime();
-    int remainingSeconds = currentTime.secsTo(m_eventPoint.time());
+    // 先判断 m_label 的文本是否为数字，如果不是数字，说明为初始状态
+    int remainingSeconds = m_label->text().toInt() ? m_label->text().toInt() - 1 : m_eventPoint.advanceTime();
     if (remainingSeconds <= 0) {
         // 到达事件点：把胶囊当前位置交给全屏提醒，红线从这里开始
         m_timer->stop();

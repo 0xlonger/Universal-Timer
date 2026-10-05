@@ -63,6 +63,7 @@ UniversalTimer2::UniversalTimer2(QObject* parent)
     refresh();
 
     // Connections
+    timer.setTimerType(Qt::PreciseTimer);
     timer.start(config.general.update_interval);
     connect(&timer, &QTimer::timeout, this, &UniversalTimer2::updateObjects);
 
