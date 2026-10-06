@@ -6,6 +6,7 @@
 #include "ui/EventPointFullscreenReminder.h"
 
 #include <QApplication>
+#include <QProcess>
 #include <QScreen>
 #include <QMenu>
 
@@ -42,6 +43,10 @@ UniversalTimer2::UniversalTimer2(QObject* parent)
         });
     TrayIcon->contextMenu()->addAction(tr("关于"), AboutPage, &AboutPageClass::showNormal);
     TrayIcon->contextMenu()->addSeparator();
+    TrayIcon->contextMenu()->addAction(tr("重启程序"), this, [] {
+        QProcess::startDetached(qApp->applicationFilePath(), QStringList());
+        qApp->quit();
+        }); // 系统托盘菜单项：重启
     TrayIcon->contextMenu()->addAction(tr("刷新"), this, &UniversalTimer2::refresh); // 系统托盘菜单项：刷新
     TrayIcon->contextMenu()->addAction(tr("立即播报全屏提醒"), FullscreenPages, &FullscreenPagesManager::showReminder); // 系统托盘菜单项：立即播报全屏提醒
 #ifdef QT_DEBUG
