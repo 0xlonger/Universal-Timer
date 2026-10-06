@@ -21,6 +21,7 @@ private:
         QDateTime target_date_time = QDateTime(QDate(2025, 6, 30), QTime(0, 0, 0)); // 目标时间，默认2025-06-30 00:00:00
         unsigned update_interval = 1000; // 更新间隔时间，默认1秒
         QString language = "zh-CN"; // 语言，默认中文
+        QString theme = "default"; // 主题（themes 文件夹里的文件名，不含 .qss），默认“默认”主题
     };
 
     struct FloatingBarConfigItems {

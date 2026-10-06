@@ -1,0 +1,155 @@
+/*
+ * 万能倒计时主题文件（默认主题）
+ *
+ * 主题文件放在程序目录（和 config.ini 同一个文件夹）的 themes 文件夹里，一个主题一个 .qss 文件。
+ * 在“设置中心 → 总设置 → 主题”里选择；修改主题文件后，点托盘菜单的“刷新”重新加载。
+ * 想做一个新主题：复制一份这个文件，改个文件名和下面的 @name，再改样式就行。
+ *
+ * 写法：
+ *   @name 主题名称;           在设置里显示的名称
+ *   @var 名字 = 值;           定义变量，在样式里用 @名字 引用
+ *   @var-dark 名字 = 值;      系统是深色模式时，这个变量改用这个值（不写就和 @var 一样）
+ *   @section 区段名           下面的样式用于界面的哪个部分，直到下一个 @section
+ * 区段里就是普通的 Qt 样式表（QSS）。主题里没写的区段会使用默认主题的，所以新主题只写想改的部分即可。
+ *
+ * 程序提供的变量（按屏幕大小或设置算出来，已带单位 px）：
+ *   FloatingBar：      @floating_bar_radius（设置里的悬浮条圆角半径）、@floating_bar_height（悬浮条高度）
+ *   SettingsContent：  @settings_radius、@settings_padding、@settings_dropdown_width、@settings_spin_button_width
+ *   SettingsNav：      @nav_font_size、@nav_padding
+ *
+ * 悬浮条阴影（QSS 不支持阴影，由程序绘制）：定义下面这些变量就会显示阴影，不定义就没有阴影
+ *   @var floating_bar_shadow_color = rgba(0, 0, 0, 0.28);   阴影颜色
+ *   @var floating_bar_shadow_blur = 16;                     模糊半径（像素）
+ *   @var floating_bar_shadow_offset_x = 0;                  水平偏移（像素）
+ *   @var floating_bar_shadow_offset_y = 4;                  垂直偏移（像素）
+ */
+
+@name 默认;
+
+/* 顶部悬浮条（作用于悬浮条里显示文字的 QLabel） */
+@section FloatingBar
+background: rgba(255, 255, 255, 0.75); border-radius: @floating_bar_radius; color: red;
+
+/* 事件点倒数胶囊里的数字（胶囊的黑底和红边是程序绘制的） */
+@section EventPointReminder
+color: white;
+
+/* 全屏窗口（设置中心、全屏提醒等）的半透明背景 */
+@section FullscreenBackground
+background: rgba(0, 0, 0, 0.75);
+
+/* 全屏窗口切换时滑过的色块 */
+@section FullscreenSlide
+background: red;
+
+/* 首次运行的欢迎页 */
+@section WelcomeLabel
+color: white; font-size: 40px; font-weight: bold; background: transparent; border-image: url(:/images/background/Universal-Timer.png);
+
+@section WelcomeButton
+color: white; font-size: 20px; font-weight: bold; background: rgba(0, 0, 0, 0.5); border-radius: 10px;
+
+/* 倒计时全屏提醒 */
+@section ReminderPage
+QLabel {
+    font-family: DIN1451, zihun59hao-chuangcuhei, Microsoft YaHei UI, Microsoft YaHei;
+    color: white;
+}
+
+/* 全屏提醒剩余天数的数字 */
+@section ReminderNumber
+color: red;
+
+/* 全屏提醒的色块 */
+@section ReminderColor
+background: red
+
+/* 全屏提醒四角闪烁的方块 */
+@section ReminderBlock
+background: red
+
+/* 设置中心整体 */
+@section SettingsPage
+QGroupBox {
+    border: 1px solid rgba(255, 0, 0, 0.5);
+    color: red;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+}
+QWidget {
+    color: white;
+}
+
+/* 设置中心左侧导航 */
+@section SettingsNav
+QPushButton {
+    color: white;
+    background-color: transparent;
+    border: none;
+    font-size: @nav_font_size;
+    padding: @nav_padding;
+}
+QPushButton:hover {
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 255, 255, 0.5), stop:1 transparent);
+}
+
+/* 设置中心左侧导航里选中项的高亮条 */
+@section SettingsNavChosen
+background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 0, 0, 0.5), stop:1 transparent); border-top: 3px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 0, 0, 0.75), stop:1 transparent); border-bottom: 3px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 0, 0, 0.75), stop:1 transparent);
+
+/* 设置中心右侧的设置项 */
+@section SettingsContent
+QWidget {
+    background-color: transparent;
+}
+QStackedWidget {
+    border-left: 3px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(255, 0, 0, 1), stop:1 transparent);
+}
+QComboBox QAbstractItemView::viewport, QComboBox QFrame, QComboBox QListView {
+    background-color: rgb(40, 0, 0);
+    border: none;
+}
+QComboBox QAbstractItemView, QComboBox QAbstractItemView::item {
+    background-color: rgb(40, 0, 0);
+    color: white;
+    border: none;
+    border-radius: @settings_radius;
+    padding: @settings_padding;
+    margin: 0px;
+}
+QComboBox QAbstractItemView::item:hover {
+    background-color: rgb(60, 0, 0);
+}
+QComboBox QAbstractItemView::item:pressed {
+    background-color: rgb(80, 0, 0);
+}
+QComboBox QAbstractItemView::item:selected {
+    background-color: rgb(100, 0, 0);
+}
+QComboBox::drop-down, QDateTimeEdit::drop-down {
+    width: @settings_dropdown_width;
+    subcontrol-origin: border;
+}
+QSpinBox::up-button, QSpinBox::down-button {
+    width: @settings_spin_button_width;
+    subcontrol-origin: border;
+}
+QLineEdit, QComboBox, QSpinBox, QDateTimeEdit, QTextEdit, QPushButton {
+    background-color: rgba(255, 0, 0, 0.25);
+    color: white;
+    border: none;
+    border-radius: @settings_radius;
+    padding: @settings_padding;
+}
+QLineEdit:hover, QComboBox:hover, QSpinBox:hover, QDateTimeEdit:hover, QTextEdit:hover, QPushButton:hover {
+    background-color: rgba(255, 0, 0, 0.3);
+}
+QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDateTimeEdit:focus, QTextEdit:focus, QPushButton:pressed {
+    background-color: rgba(255, 0, 0, 0.4);
+}
+QLineEdit:disabled, QComboBox:disabled, QSpinBox:disabled, QDateTimeEdit:disabled, QTextEdit:disabled, QPushButton:disabled {
+    background-color: rgba(255, 0, 0, 0.1);
+    color: gray;
+}

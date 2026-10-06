@@ -1,5 +1,6 @@
 #include "core/Global.h"
 #include "ui/SettingsPage.h"
+#include "core/ThemeManager.h"
 
 #include <QVBoxLayout>
 #include <QFormLayout>
@@ -8,17 +9,10 @@ SettingsPageClass::SettingsPageClass(QWidget* parent, ConfigManager& cfg, Floati
     : QWidget(parent), config(cfg), FloatingBar(bar)
 {
 
-    this->setStyleSheet("QGroupBox {\
-                            border: 1px solid rgba(255, 0, 0, 0.5);\
-                            color: red;\
-                        }\
-                        QGroupBox::title {\
-                            subcontrol-origin: margin;\
-                            subcontrol-position: top left;\
-                        }\
-                        QWidget {\
-                            color: white;\
-                        }");
+    this->setStyleSheet(ThemeManager::instance().style("SettingsPage"));
+    connect(&ThemeManager::instance(), &ThemeManager::changed, this, [this] {
+        this->setStyleSheet(ThemeManager::instance().style("SettingsPage"));
+        });
     
     //initializeObjects();
     //adjustObjects();

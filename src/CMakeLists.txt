@@ -28,6 +28,8 @@ set(PROJECT_SOURCES
     core/ConfigManager.cpp
     core/Global.h
     core/EventPoint.h
+    core/ThemeManager.h
+    core/ThemeManager.cpp
     ui/EventPointReminder.h
     ui/EventPointReminder.cpp
     ui/EventPointFullscreenReminder.h
