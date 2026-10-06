@@ -5,17 +5,13 @@
 >
 > Alternatively, for a period of three years after the last distribution of this software, I will provide the source code upon request via [create an Issue on this GitHub repository].
 
-> [!NOTE]
-> 本人由于学业原因，在2026年上半年，本仓库的更新速度可能会变得极慢。
-> 感谢大家的理解与耐心。
-
 # 万能倒计时 Universal-Timer
 
 ![GPLv3 License](https://img.shields.io/badge/license-GPLv3-blue.svg)
 ![Qt](https://img.shields.io/badge/Qt-6.10.1-green.svg)
-![Version](https://img.shields.io/badge/version-2.1.1-orange)
+![Version](https://img.shields.io/badge/version-2.2.0-orange)
 
-**万能倒计时**（原项目名 UniversalTimer2）是一个基于 Qt 的强大且可定制的倒计时应用程序。它通过在悬浮条中显示剩余时间，并提供带有动画和音效的全屏提醒，帮助您追踪重要事件。这是 **2.1.1** 版本，完全由 1.x 系列重写而来，将具有比 1.x 更多的功能和更好的性能。
+**万能倒计时**（原项目名 UniversalTimer2）是一个基于 Qt 的强大且可定制的倒计时应用程序。它通过在悬浮条中显示剩余时间，并提供带有动画和音效的全屏提醒，帮助您追踪重要事件。
 
 ---
 
@@ -49,6 +45,7 @@
 - **配置持久化** – 所有设置保存在 `config.ini` 中，确保下次启动时自动加载，无需重新配置。您也可随时手动修改，自由定制。
 - **定时显示全屏提醒** – 在一天中的预设时间自动显示全屏提醒，让您在过度放松时也能及时提醒自己。您可以随时在`reminder_time_list.txt`文件中添加或删除时间，实现灵活的提醒管理。
 - **欢迎界面** – 首次使用时提供引导，帮助您快速上手，轻松开始。
+- **事件点提醒** – 当到达事件点提醒提前秒数的时间后，在屏幕上悬浮显示一个事件点提醒胶囊。事件点倒计时结束后，将显示事件点全屏提醒，以华丽的动画提醒事件点的到达。
 
 ---
 
