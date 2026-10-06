@@ -1,5 +1,6 @@
 #include "core/Global.h"
 #include "ui/SettingsContent.h"
+#include "core/ThemeManager.h"
 
 #include <QListView>
 #include <QFormLayout>
@@ -42,6 +43,10 @@ void SettingsContentClass::initializeObjects() {
     TargetDateTimeEdit->setCalendarPopup(true);
     TargetDateTimeEdit->setDisplayFormat("yyyy-MM-dd HH:mm:ss"); // 设置显示格式
     LanguageComboBox = new QComboBox(GeneralSettingsPage);
+    ThemeComboBox = new QComboBox(GeneralSettingsPage);
+    for (const ThemeManager::ThemeInfo& theme : ThemeManager::instance().themes())
+        ThemeComboBox->addItem(theme.name, theme.id);
+    ThemeComboBox->setCurrentIndex(qMax(0, ThemeComboBox->findData(ThemeManager::instance().currentId())));
 
     // Floating Bar
     IsShowFloatingBarCheckBox = new QCheckBox(tr("是否显示悬浮条"), FloatingBarSettingsPage);
@@ -103,6 +108,7 @@ void SettingsContentClass::initializeObjects() {
     QFormLayout* GeneralSettingsPageLayout = new QFormLayout(GeneralSettingsPage);
     GeneralSettingsPageLayout->addRow(tr("目标时间："), TargetDateTimeEdit);
     GeneralSettingsPageLayout->addRow(tr("语言："), LanguageComboBox);
+    GeneralSettingsPageLayout->addRow(tr("主题："), ThemeComboBox);
     GeneralSettingsPageLayout->setContentsMargins(25, 25, 25, 25);
     GeneralSettingsPage->setLayout(GeneralSettingsPageLayout);
 
@@ -143,6 +149,11 @@ void SettingsContentClass::connectEmissions() {
         config.set(config.general.target_date_time, date_time);
         });
     // todo)) update_interval...
+    connect(ThemeComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
+        config.set(config.general.theme, ThemeComboBox->itemData(index).toString());
+        ThemeManager::instance().load(config.general.theme);
+        });
+    connect(&ThemeManager::instance(), &ThemeManager::changed, this, &SettingsContentClass::applyTheme);
 
     // FloatingBar
     connect(IsShowFloatingBarCheckBox, &QCheckBox::checkStateChanged, this, [this] {
@@ -175,6 +186,7 @@ void SettingsContentClass::connectEmissions() {
     connect(FloatingBarHeightSpinBox, &QSpinBox::valueChanged, this, [this](int value) {
         config.set(config.floating_bar.floating_bar_height, value);
         FloatingBar->setFixedHeight(value);
+        FloatingBar->applyTheme(config.floating_bar.floating_bar_border_radius, value);
         QFont font;
         font.setPixelSize(value * GOLDEN_RATIO_INV);
         FloatingBar->Bar->setFont(font);
@@ -182,7 +194,7 @@ void SettingsContentClass::connectEmissions() {
         });
     connect(FloatingBarBorderRadiusSpinBox, &QSpinBox::valueChanged, this, [this](int value) {
         config.set(config.floating_bar.floating_bar_border_radius, value);
-        FloatingBar->Bar->setStyleSheet("background: rgba(255, 255, 255, 0.75); border-radius: " + QString::number(value) + "px; color: red;"); // 更新悬浮条样式
+        FloatingBar->applyTheme(value, config.floating_bar.floating_bar_height); // 更新悬浮条样式
         });
 
     // Reminder
@@ -222,59 +234,16 @@ void SettingsContentClass::resizeEvent(QResizeEvent* event) {
         child->setFont(font);
     }
 
-    this->setStyleSheet(QString(R"(
-            QWidget {
-                background-color: transparent;
-            }
-            QStackedWidget {
-                border-left: 3px solid qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(255, 0, 0, 1), stop:1 transparent);
-            }
-            QComboBox QAbstractItemView::viewport, QComboBox QFrame, QComboBox QListView {
-                background-color: rgb(40, 0, 0);
-                border: none;
-            }
-            QComboBox QAbstractItemView, QComboBox QAbstractItemView::item {
-                background-color: rgb(40, 0, 0);
-                color: white;
-                border: none;
-                border-radius: %1px;
-                padding: %2px;
-                margin: 0px;
-            }
-            QComboBox QAbstractItemView::item:hover {
-                background-color: rgb(60, 0, 0);
-            }
-            QComboBox QAbstractItemView::item:pressed {
-                background-color: rgb(80, 0, 0);
-            }
-            QComboBox QAbstractItemView::item:selected {
-                background-color: rgb(100, 0, 0);
-            }
-            QComboBox::drop-down, QDateTimeEdit::drop-down {
-                width: %3px;
-                subcontrol-origin: border;
-            }
-            QSpinBox::up-button, QSpinBox::down-button {
-                width: %4px;
-                subcontrol-origin: border;
-            }
-            QLineEdit, QComboBox, QSpinBox, QDateTimeEdit, QTextEdit, QPushButton {
-                background-color: rgba(255, 0, 0, 0.25);
-                color: white;
-                border: none;
-                border-radius: %1px;
-                padding: %2px;
-            }
-            QLineEdit:hover, QComboBox:hover, QSpinBox:hover, QDateTimeEdit:hover, QTextEdit:hover, QPushButton:hover {
-                background-color: rgba(255, 0, 0, 0.3);
-            }
-            QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDateTimeEdit:focus, QTextEdit:focus, QPushButton:pressed {
-                background-color: rgba(255, 0, 0, 0.4);
-            }
-            QLineEdit:disabled, QComboBox:disabled, QSpinBox:disabled, QDateTimeEdit:disabled, QTextEdit:disabled, QPushButton:disabled {
-                background-color: rgba(255, 0, 0, 0.1);
-                color: gray;
-            }
-        )").arg(this->height() * 0.03 / 4).arg((this->height() * 0.03 / GOLDEN_RATIO_INV - this->height() * 0.03) / 2).arg(this->height() * 0.03 / GOLDEN_RATIO_INV).arg(this->height() * 0.03 / GOLDEN_RATIO_INV / 2)
-    );
+    applyTheme();
+}
+
+void SettingsContentClass::applyTheme() {
+    // 尺寸按设置中心高度算，作为变量提供给主题
+    const qreal unit = this->height() * 0.03;
+    this->setStyleSheet(ThemeManager::instance().style("SettingsContent", {
+        { "settings_radius", QString("%1px").arg(unit / 4) },
+        { "settings_padding", QString("%1px").arg((unit / GOLDEN_RATIO_INV - unit) / 2) },
+        { "settings_dropdown_width", QString("%1px").arg(unit / GOLDEN_RATIO_INV) },
+        { "settings_spin_button_width", QString("%1px").arg(unit / GOLDEN_RATIO_INV / 2) },
+        }));
 }

@@ -2,6 +2,7 @@
 #include "ui/ReminderPage.h"
 #include "ui/SettingsPage.h"
 #include "ui/WelcomePage.h"
+#include "core/ThemeManager.h"
 
 #include <QTimer>
 
@@ -12,10 +13,13 @@ FullscreenPagesManager::FullscreenPagesManager(QWidget* parent, ConfigManager& c
     this->setAttribute(Qt::WA_TranslucentBackground);
 
     BackgroundWidget = new QWidget(this);
-    BackgroundWidget->setStyleSheet("background: rgba(0, 0, 0, 0.75);");
-
     SlideAnimationWidget = new QWidget(this);
-    SlideAnimationWidget->setStyleSheet("background: red;");
+    auto applyTheme = [this] {
+        BackgroundWidget->setStyleSheet(ThemeManager::instance().style("FullscreenBackground"));
+        SlideAnimationWidget->setStyleSheet(ThemeManager::instance().style("FullscreenSlide"));
+        };
+    applyTheme();
+    connect(&ThemeManager::instance(), &ThemeManager::changed, this, applyTheme);
     BackgroundWidget->hide();
 
     SlideInAnimation = new QPropertyAnimation(SlideAnimationWidget, "pos", this);

@@ -1,5 +1,6 @@
 #include "core/Global.h"
 #include "ui/SettingsNav.h"
+#include "core/ThemeManager.h"
 
 #include <QVBoxLayout>
 
@@ -8,6 +9,7 @@ SettingsNavClass::SettingsNavClass(QWidget* parent, SettingsContentClass* conten
 {
 
     ChosenLabel = new QLabel(this);
+    connect(&ThemeManager::instance(), &ThemeManager::changed, this, &SettingsNavClass::applyTheme);
 
     GeneralSettingsButton = new QPushButton(tr("总设置"), this);
     FloatingBarSettingsButton = new QPushButton(tr("悬浮条设置"), this);
@@ -75,25 +77,22 @@ SettingsNavClass::SettingsNavClass(QWidget* parent, SettingsContentClass* conten
 SettingsNavClass::~SettingsNavClass()
 {}
 
+void SettingsNavClass::applyTheme() {
+    // 尺寸按导航栏高度算，作为变量提供给主题
+    this->setStyleSheet(ThemeManager::instance().style("SettingsNav", {
+        { "nav_font_size", QString("%1px").arg(this->height() * 0.03) },
+        { "nav_padding", QString("%1px").arg((this->height() * 0.03 / GOLDEN_RATIO_INV - this->height() * 0.03) / 2) },
+        }));
+    ChosenLabel->setStyleSheet(ThemeManager::instance().style("SettingsNavChosen"));
+}
+
 void SettingsNavClass::resizeEvent(QResizeEvent* event) {
     QWidget::resizeEvent(event);
     
-    this->setStyleSheet(QString(R"(
-        QPushButton {
-            color: white;
-            background-color: transparent;
-            border: none;
-            font-size: %1px;
-            padding: %2px;
-        }
-        QPushButton:hover {
-            background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 255, 255, 0.5), stop:1 transparent);
-        }
-    )").arg(this->height() * 0.03).arg((this->height() * 0.03 / GOLDEN_RATIO_INV - this->height() * 0.03) / 2));
+    applyTheme();
 
     this->layout()->activate();
 
-    ChosenLabel->setStyleSheet("background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 0, 0, 0.5), stop:1 transparent); border-top: 3px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 0, 0, 0.75), stop:1 transparent); border-bottom: 3px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 0, 0, 0.75), stop:1 transparent);");
     ChosenLabel->setGeometry(CloseButton->geometry());
 
 

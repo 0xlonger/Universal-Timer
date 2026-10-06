@@ -1,5 +1,6 @@
 #include "EventPointReminder.h"
 #include "../core/Global.h"
+#include "../core/ThemeManager.h"
 
 #include <QPainter>
 
@@ -13,7 +14,7 @@ EventPointReminder::EventPointReminder(QWidget* parent, const EventPoint& eventP
 
 void EventPointReminder::setupUI()
 {
-    this->setStyleSheet("color: white;");
+    this->setStyleSheet(ThemeManager::instance().style("EventPointReminder"));
     this->setAlignment(Qt::AlignCenter);
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool);
     this->setAttribute(Qt::WA_TranslucentBackground);

@@ -1,0 +1,27 @@
+/*
+ * 万能倒计时主题文件：Win11
+ *
+ * 只把悬浮条的背景换成仿 Win11 的样式（参考 ClassIsland 的 Fluent 主题）：纯色底、1px 描边（底边稍深）、圆角和阴影，
+ * 文字不变，跟随系统深浅色。其他部分没有写，使用默认主题。写法见 default.qss 开头的说明。
+ */
+
+@name Win11;
+
+/* 底色：WinUI 的 SolidBackgroundFillColorSecondary */
+@var bar_background = rgb(238, 238, 238);
+@var-dark bar_background = rgb(28, 28, 28);
+
+/* 描边：WinUI 的 ControlElevationBorderBrush，底边稍深 */
+@var bar_border = rgba(0, 0, 0, 0.06);
+@var-dark bar_border = rgba(255, 255, 255, 0.07);
+@var bar_border_bottom = rgba(0, 0, 0, 0.16);
+@var-dark bar_border_bottom = rgba(255, 255, 255, 0.09);
+
+/* 阴影：ClassIsland Fluent 主题的 BoxShadow="0 4 8 2 #48000000" */
+@var floating_bar_shadow_color = rgba(0, 0, 0, 0.28);
+@var floating_bar_shadow_blur = 16;
+@var floating_bar_shadow_offset_x = 0;
+@var floating_bar_shadow_offset_y = 4;
+
+@section FloatingBar
+background: @bar_background; border: 1px solid @bar_border; border-bottom-color: @bar_border_bottom; border-radius: @floating_bar_radius; color: red;

@@ -42,6 +42,8 @@ protected:
 
 private:
 
+    void applyTheme(); // 按当前主题和设置中心高度设置样式表
+
     void initializeObjects();
     void connectEmissions();
 
@@ -62,6 +64,7 @@ private:
     // General
     QDateTimeEdit* TargetDateTimeEdit;
     QComboBox* LanguageComboBox;
+    QComboBox* ThemeComboBox;
 
     // Floating Bar
     QCheckBox* IsShowFloatingBarCheckBox;

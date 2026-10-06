@@ -1,5 +1,6 @@
 #include "core/Global.h"
 #include "ui/ReminderPage.h"
+#include "core/ThemeManager.h"
 
 #include <QTimer>
 #include <QDateTime>
@@ -11,10 +12,7 @@ ReminderPageClass::ReminderPageClass(QWidget* parent, const ConfigManager& cfg)
     assert(parent != nullptr && "parent cannot be nullptr");
     if (parent == nullptr) throw std::invalid_argument("parent cannot be nullptr");
 
-    this->setStyleSheet("QLabel {\
-                            font-family: DIN1451, zihun59hao-chuangcuhei, Microsoft YaHei UI, Microsoft YaHei;\
-                            color: white;\
-                        }");
+    this->setStyleSheet(ThemeManager::instance().style("ReminderPage"));
 
 // 在Debug下编译时
 #ifdef QT_DEBUG
@@ -34,7 +32,7 @@ ReminderPageClass::ReminderPageClass(QWidget* parent, const ConfigManager& cfg)
 
     for (int i = 0; i < 4; i++) {
         ReminderBlockLabels.append(new QLabel(parent)); // 全屏提醒块标签
-        ReminderBlockLabels[i]->setStyleSheet("background: red");
+        ReminderBlockLabels[i]->setStyleSheet(ThemeManager::instance().style("ReminderBlock"));
         ReminderBlockLabels[i]->hide();
     }
     ReminderBlockLabels[0]->setGeometry(parent->height() * 0.05, parent->height() * 0.05, parent->height() * 0.1, parent->height() * 0.1); // 左上
@@ -60,8 +58,8 @@ void ReminderPageClass::initializeObjects() {
     TextLabel = new QLabel(config.reminder.reminder_small_text + QString::number(left_time / 86400) + " DAYS", this); // 全屏提醒小文本标签
     ColorLabel = new QLabel(this); // 全屏提醒颜色标签
 
-    NumberLabel->setStyleSheet("color: red;");
-    ColorLabel->setStyleSheet("background: red");
+    NumberLabel->setStyleSheet(ThemeManager::instance().style("ReminderNumber"));
+    ColorLabel->setStyleSheet(ThemeManager::instance().style("ReminderColor"));
     
     TitleLabel->show();
     ConjunctionLabel->show();

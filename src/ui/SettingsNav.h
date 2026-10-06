@@ -24,6 +24,8 @@ protected:
 
 private:
 
+    void applyTheme(); // 按当前主题和导航栏高度设置样式表
+
     // Settings Content
     SettingsContentClass* SettingsContent;
 
