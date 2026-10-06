@@ -2,10 +2,10 @@
  * Universal-Timer
  * Copyright (c) 2025-2026 龙ger_longer
  * Author: 龙ger_longer
- * Developer: 龙ger_longer, new_pointer
- * Version: 2.1.0
+ * Developer: 龙ger_longer, new_pointer, XUESHENG_XSH
+ * Version: 2.2.0
  * License: GNU General Public License v3.0
- * Repository: https://github.com/longlonger2022/Universal-Timer
+ * Repository: https://github.com/0xlonger/Universal-Timer
  * Description: A useful countdown timer application.
 */
 

@@ -17,8 +17,9 @@ AboutPageClass::AboutPageClass(QWidget* parent)
         tr("万能倒计时<br>"
             "版本：%1<br>"
             "开发者：<br>"
-            "    龙ger_longer (B站同名，GitHub用户名longlonger2022)<br>"
-            "    new_pointer (B站同名，GitHub用户名new5Fpointer)"
+            "    龙ger_longer (B站同名，GitHub 用户名 0xlonger)<br>"
+            "    new_pointer (B站同名，GitHub 用户名 new5Fpointer)<br>"
+            "    XUESHENG_XSH (B站同名，GitHub 用户名 bilixuesheng)<br>"
             ).arg(CURRENT_VERSION_STRING),
         this
         );
@@ -32,11 +33,10 @@ AboutPageClass::AboutPageClass(QWidget* parent)
             "本软件完全免费且开源，赞助完全取决于自愿！<br>"
             "您可以通过托盘图标进入设置界面，根据您的喜好个性化本软件。<br>"
             "截至该版本发布，仍暂时没有自动更新的功能。由此查看万能倒计时的各个版本：%1<br>"
-            "官网（可能会变动，请注意关注最新动向）：%2 或 %3<br><br>"
-            "若此地为开发者曾经学习之处，请往下读：<br>"
-            "这个程序最初只是为了满足2025届会考倒计时需求，后经过许多更新，走到了这里，截至该版本发布，已经有一年之多了。由于开发者的学业影响，该程序在匆忙中进行着并不大的“大”更新，可能并不完美甚至说不好用，还可能有许多bug。这一版本发布 (2026年5月) 后，为学业着想，将会有数十天的几乎不更新，而等到暂时摆脱影响之后，又几乎不再会线下前往亲手更新，故还请关注官网动向还有GitHub仓库，以获取最新的版本。同时，也欢迎来反馈！<br><br>"
-            "注：编辑全屏提醒时间列表的界面已经没有时间写了，如果需要修改全屏提醒的时间列表，可以修改程序目录下的 reminder_time_list.txt，谢谢！"
-            ).arg(GITHUB_RELEASE_URL).arg(GITHUB_PAGES_DOMAIN_URL).arg(CLOUDFLARE_PAGES_DOMAIN_URL),
+            "网站（可能会变动，请注意关注最新动向）：<br>"
+            "&nbsp;&nbsp;&nbsp;&nbsp;%2<br>"
+            "&nbsp;&nbsp;&nbsp;&nbsp;若无法访问，请前往：%3 或 %4"
+            ).arg(GITHUB_RELEASE_URL).arg(DOMAIN_URL).arg(GITHUB_PAGES_DOMAIN_URL).arg(CLOUDFLARE_PAGES_DOMAIN_URL),
         this
         );
     AboutTextEdit->setReadOnly(true);

@@ -62,8 +62,8 @@ IDI_ICON1               ICON                    "../assets/images/icons/Universa
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,1,2,0
- PRODUCTVERSION 2,1,2,0
+ FILEVERSION 2,2,0,0
+ PRODUCTVERSION 2,2,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -79,11 +79,11 @@ BEGIN
         BLOCK "040004b0"
         BEGIN
             VALUE "FileDescription", "Universal-Timer"
-            VALUE "FileVersion", "2.1.2.0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 龙ger_longer"
+            VALUE "FileVersion", "2.2.0.0"
+            VALUE "LegalCopyright", "Copyright (c) 2025-2026 龙ger_longer"
             VALUE "OriginalFilename", "UniversalTimer2.exe"
             VALUE "ProductName", "Universal-Timer"
-            VALUE "ProductVersion", "2.1.2.0"
+            VALUE "ProductVersion", "2.2.0.0"
         END
     END
     BLOCK "VarFileInfo"
