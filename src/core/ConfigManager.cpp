@@ -18,6 +18,7 @@ void ConfigManager::read() {
         qDebug() << "读取配置文件……";
 
         Settings.beginGroup("main");
+        general.debug_mode = Settings.value("debug_mode", false).toBool();
         general.target_date_time = Settings.value("target_date_time", QDateTime(QDate(2025, 6, 30), QTime(0, 0, 0))).toDateTime();
         general.update_interval = Settings.value("update_interval", 1000).toInt();
         general.language = Settings.value("language", "zh-CN").toString();
@@ -83,6 +84,7 @@ void ConfigManager::write() {
     qDebug() << "写入配置文件……";
 
     Settings.beginGroup("main");
+    Settings.setValue("debug_mode", general.debug_mode);
     Settings.setValue("target_date_time", general.target_date_time);
     Settings.setValue("update_interval", general.update_interval);
     Settings.setValue("language", general.language);

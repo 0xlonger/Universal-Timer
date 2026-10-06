@@ -14,10 +14,10 @@ ReminderPageClass::ReminderPageClass(QWidget* parent, const ConfigManager& cfg)
 
     this->setStyleSheet(ThemeManager::instance().style("ReminderPage"));
 
-// 在Debug下编译时
-#ifdef QT_DEBUG
-    this->setStyleSheet(this->styleSheet() + "QWidget {border: 1px solid red;}");
-#endif
+    // 在 Debug 下
+    if (config.general.debug_mode) {
+        this->setStyleSheet(this->styleSheet() + "QWidget {border: 1px solid red;}");
+    }
     
     // Sound
     CountdownSound = new QSoundEffect(this);
