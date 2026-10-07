@@ -78,9 +78,13 @@ UniversalTimer2::UniversalTimer2(QObject* parent)
     refresh();
 
     // Connections
+    timer.setSingleShot(true);
     timer.setTimerType(Qt::PreciseTimer);
-    timer.start(config.general.update_interval);
-    connect(&timer, &QTimer::timeout, this, &UniversalTimer2::updateObjects);
+    connect(&timer, &QTimer::timeout, this, [this] {
+        updateObjects();
+        scheduleNextUpdate();
+        });
+    scheduleNextUpdate();
 
 }
 
@@ -153,6 +157,16 @@ void UniversalTimer2::updateFloatingBar() {
             FloatingBar->move(0, 0);
             break;
     }
+}
+
+// 安排下一次更新
+// 计时器的触发时刻和系统时间的整秒之间有一个固定的零头，零头恰好贴着整秒时，前后抖几毫秒就会落到整秒的另一边：
+// 某一秒被跳过（悬浮条秒数跳、设在这一秒的定时全屏提醒和事件点不弹出），或者同一秒进来两次。
+// 所以每次都安排在下一个整 update_interval 刚过 50ms 时触发
+void UniversalTimer2::scheduleNextUpdate() {
+    const int interval = qMax(1, int(config.general.update_interval));
+    const int now = QTime::currentTime().msecsSinceStartOfDay();
+    timer.start(interval - now % interval + 50);
 }
 
 // 更新函数
