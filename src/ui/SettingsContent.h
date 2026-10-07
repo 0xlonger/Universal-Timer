@@ -73,6 +73,10 @@ private:
     QComboBox* FloatingBarPositionComboBox;
     QSpinBox* FloatingBarHeightSpinBox;
     QSpinBox* FloatingBarBorderRadiusSpinBox;
+    QSpinBox* FloatingBarTopMarginSpinBox;
+    QSpinBox* FloatingBarOpacitySpinBox;
+    QCheckBox* IsMouseInFadingCheckBox;
+    QCheckBox* IsMouseClickThroughCheckBox;
 
     // Reminder
     QCheckBox* IsShowReminderCheckBox;

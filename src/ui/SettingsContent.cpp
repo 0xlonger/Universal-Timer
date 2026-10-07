@@ -67,6 +67,18 @@ void SettingsContentClass::initializeObjects() {
     FloatingBarBorderRadiusSpinBox->setRange(0, config.floating_bar.floating_bar_height / 2);
     FloatingBarBorderRadiusSpinBox->setValue(config.floating_bar.floating_bar_border_radius);
     FloatingBarBorderRadiusSpinBox->setSuffix(tr(" 像素")); // 悬浮条圆角半径后缀文本
+    FloatingBarTopMarginSpinBox = new QSpinBox(FloatingBarSettingsPage);
+    FloatingBarTopMarginSpinBox->setRange(0, 5714);
+    FloatingBarTopMarginSpinBox->setValue(config.floating_bar.floating_bar_top_margin);
+    FloatingBarTopMarginSpinBox->setSuffix(tr(" 像素")); // 悬浮条距顶边距离后缀文本
+    FloatingBarOpacitySpinBox = new QSpinBox(FloatingBarSettingsPage);
+    FloatingBarOpacitySpinBox->setRange(0, 100);
+    FloatingBarOpacitySpinBox->setValue(config.floating_bar.floating_bar_opacity);
+    FloatingBarOpacitySpinBox->setSuffix(tr(" %")); // 悬浮条不透明度后缀文本
+    IsMouseInFadingCheckBox = new QCheckBox(tr("鼠标移入时淡化"), FloatingBarSettingsPage);
+    IsMouseInFadingCheckBox->setChecked(config.floating_bar.is_mouse_in_fading_enabled);
+    IsMouseClickThroughCheckBox = new QCheckBox(tr("鼠标点击穿透"), FloatingBarSettingsPage);
+    IsMouseClickThroughCheckBox->setChecked(config.floating_bar.is_mouse_click_through_enabled);
 
     // Reminder
     IsShowReminderCheckBox = new QCheckBox(tr("是否显示全屏提醒"), ReminderSettingsPage);
@@ -119,6 +131,10 @@ void SettingsContentClass::initializeObjects() {
     FloatingBarSettingsPageLayout->addRow(tr("悬浮条位置："), FloatingBarPositionComboBox);
     FloatingBarSettingsPageLayout->addRow(tr("悬浮条高度："), FloatingBarHeightSpinBox);
     FloatingBarSettingsPageLayout->addRow(tr("悬浮条圆角半径："), FloatingBarBorderRadiusSpinBox);
+    FloatingBarSettingsPageLayout->addRow(tr("悬浮条距顶边距离："), FloatingBarTopMarginSpinBox);
+    FloatingBarSettingsPageLayout->addRow(tr("悬浮条不透明度："), FloatingBarOpacitySpinBox);
+    FloatingBarSettingsPageLayout->addRow(IsMouseInFadingCheckBox);
+    FloatingBarSettingsPageLayout->addRow(IsMouseClickThroughCheckBox);
     FloatingBarSettingsPageLayout->setContentsMargins(25, 25, 25, 25);
     FloatingBarSettingsPage->setLayout(FloatingBarSettingsPageLayout);
 
@@ -171,7 +187,7 @@ void SettingsContentClass::connectEmissions() {
         });
     connect(FloatingBarLevelComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
         config.set(config.floating_bar.floating_bar_on_top, index == 0);
-        FloatingBar->setWindowFlags((config.floating_bar.floating_bar_on_top ? Qt::WindowStaysOnTopHint : Qt::WindowStaysOnBottomHint) | Qt::FramelessWindowHint | Qt::Tool);
+        FloatingBar->updateWindowFlags();
         FloatingBar->hide();
         FloatingBar->show();
 #ifdef Q_OS_WIN
@@ -195,6 +211,21 @@ void SettingsContentClass::connectEmissions() {
     connect(FloatingBarBorderRadiusSpinBox, &QSpinBox::valueChanged, this, [this](int value) {
         config.set(config.floating_bar.floating_bar_border_radius, value);
         FloatingBar->applyTheme(value, config.floating_bar.floating_bar_height); // 更新悬浮条样式
+        });
+    connect(FloatingBarTopMarginSpinBox, &QSpinBox::valueChanged, this, [this](int value) {
+        config.set(config.floating_bar.floating_bar_top_margin, value);
+        });
+    connect(FloatingBarOpacitySpinBox, &QSpinBox::valueChanged, this, [this](int value) {
+        config.set(config.floating_bar.floating_bar_opacity, value);
+        FloatingBar->updateOpacity();
+        });
+    connect(IsMouseInFadingCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        config.set(config.floating_bar.is_mouse_in_fading_enabled, checked);
+        FloatingBar->updateOpacity();
+        });
+    connect(IsMouseClickThroughCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        config.set(config.floating_bar.is_mouse_click_through_enabled, checked);
+        FloatingBar->updateWindowFlags();
         });
 
     // Reminder

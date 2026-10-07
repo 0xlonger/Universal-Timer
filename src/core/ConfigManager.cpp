@@ -32,6 +32,10 @@ void ConfigManager::read() {
         floating_bar.floating_bar_border_radius = Settings.value("floating_bar_border_radius", 10).toUInt();
         floating_bar.floating_bar_height = Settings.value("floating_bar_height", 50).toUInt();
         floating_bar.floating_bar_text = Settings.value("floating_bar_text", "距会考还剩：").toString();
+        floating_bar.floating_bar_top_margin = Settings.value("floating_bar_top_margin", 0).toUInt();
+        floating_bar.floating_bar_opacity = Settings.value("floating_bar_opacity", 100).toUInt();
+        floating_bar.is_mouse_in_fading_enabled = Settings.value("is_mouse_in_fading_enabled", true).toBool();
+        floating_bar.is_mouse_click_through_enabled = Settings.value("is_mouse_click_through_enabled", true).toBool();
         Settings.endGroup();
 
         Settings.beginGroup("reminder");
@@ -98,6 +102,10 @@ void ConfigManager::write() {
     Settings.setValue("floating_bar_border_radius", floating_bar.floating_bar_border_radius);
     Settings.setValue("floating_bar_height", floating_bar.floating_bar_height);
     Settings.setValue("floating_bar_text", floating_bar.floating_bar_text);
+    Settings.setValue("floating_bar_top_margin", floating_bar.floating_bar_top_margin);
+    Settings.setValue("floating_bar_opacity", floating_bar.floating_bar_opacity);
+    Settings.setValue("is_mouse_in_fading_enabled", floating_bar.is_mouse_in_fading_enabled);
+    Settings.setValue("is_mouse_click_through_enabled", floating_bar.is_mouse_click_through_enabled);
     Settings.endGroup();
 
     Settings.beginGroup("reminder");

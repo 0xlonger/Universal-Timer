@@ -32,6 +32,10 @@ private:
         unsigned floating_bar_border_radius = 10; // 悬浮条圆角，默认10
         unsigned floating_bar_height = 50; // 悬浮条高度，默认50
         QString floating_bar_text = "距会考还剩："; // 悬浮条文本
+        unsigned floating_bar_top_margin = 0; // 悬浮条距屏幕顶边距离，默认0
+        unsigned floating_bar_opacity = 100; // 悬浮条不透明度（百分比），默认100
+        bool is_mouse_in_fading_enabled = true; // 鼠标移入时淡化，默认开启
+        bool is_mouse_click_through_enabled = true; // 鼠标点击穿透，默认开启
     };
 
     struct ReminderConfigItems {

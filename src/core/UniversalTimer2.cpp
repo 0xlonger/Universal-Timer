@@ -22,7 +22,7 @@ UniversalTimer2::UniversalTimer2(QObject* parent)
     ThemeManager::instance().load(config.general.theme);
 
     // Floating Bar
-    FloatingBar = new FloatingBarClass;
+    FloatingBar = new FloatingBarClass(config);
     connect(&ThemeManager::instance(), &ThemeManager::changed, this, [this] {
         FloatingBar->applyTheme(config.floating_bar.floating_bar_border_radius, config.floating_bar.floating_bar_height);
         updateFloatingBar();
@@ -117,7 +117,8 @@ void UniversalTimer2::refresh() {
     if (!config.floating_bar.is_show_floating_bar) FloatingBar->hide();
     else FloatingBar->show();
     FloatingBar->applyTheme(config.floating_bar.floating_bar_border_radius, config.floating_bar.floating_bar_height); // 更新悬浮条样式
-    FloatingBar->setWindowFlags((config.floating_bar.floating_bar_on_top ? Qt::WindowStaysOnTopHint : Qt::WindowStaysOnBottomHint) | Qt::FramelessWindowHint | Qt::Tool);
+    FloatingBar->updateWindowFlags(); // 更新悬浮条层级和点击穿透
+    FloatingBar->updateOpacity(); // 更新悬浮条不透明度和鼠标移入淡化
     FloatingBar->setFixedHeight(config.floating_bar.floating_bar_height);
     QFont font;
     font.setPixelSize(config.floating_bar.floating_bar_height * GOLDEN_RATIO_INV);
@@ -141,20 +142,21 @@ void UniversalTimer2::updateFloatingBar() {
     FloatingBar->Bar->adjustSize();
     FloatingBar->Bar->resize(FloatingBar->Bar->width() + 20, config.floating_bar.floating_bar_height);
     // 主题有阴影时，窗口四周要给阴影留出位置，悬浮条本身的位置不变
-    const QMargins margins = FloatingBar->shadowMargins(config.floating_bar.floating_bar_position);
+    const QMargins margins = FloatingBar->shadowMargins(config.floating_bar.floating_bar_position, config.floating_bar.floating_bar_top_margin);
     FloatingBar->Bar->move(margins.left(), margins.top());
     FloatingBar->setFixedSize(FloatingBar->Bar->width() + margins.left() + margins.right(), FloatingBar->Bar->height() + margins.top() + margins.bottom());
 
-    // 更新位置
+    // 更新位置（距顶边距离是悬浮条本身离屏幕顶边的距离）
+    const int y = int(config.floating_bar.floating_bar_top_margin) - margins.top();
     switch (config.floating_bar.floating_bar_position) {
         case FloatingBarPosition::TopCenter:
-            FloatingBar->move((desktop.width() - FloatingBar->Bar->width()) / 2 - margins.left(), 0);
+            FloatingBar->move((desktop.width() - FloatingBar->Bar->width()) / 2 - margins.left(), y);
             break;
         case FloatingBarPosition::TopRight:
-            FloatingBar->move(desktop.width() - FloatingBar->Bar->width() - margins.left(), 0);
+            FloatingBar->move(desktop.width() - FloatingBar->Bar->width() - margins.left(), y);
             break;
         case FloatingBarPosition::TopLeft:
-            FloatingBar->move(0, 0);
+            FloatingBar->move(0, y);
             break;
     }
 }
