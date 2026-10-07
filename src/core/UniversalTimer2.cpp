@@ -114,8 +114,7 @@ void UniversalTimer2::refresh() {
     ThemeManager::instance().load(config.general.theme);
     
     // Floating Bar
-    if (!config.floating_bar.is_show_floating_bar) FloatingBar->hide();
-    else FloatingBar->show();
+    FloatingBar->updateVisibility(); // 按“是否显示悬浮条”和隐藏规则显示或隐藏
     FloatingBar->applyTheme(config.floating_bar.floating_bar_border_radius, config.floating_bar.floating_bar_height); // 更新悬浮条样式
     FloatingBar->updateWindowFlags(); // 更新悬浮条层级和点击穿透
     FloatingBar->updateOpacity(); // 更新悬浮条不透明度和鼠标移入淡化

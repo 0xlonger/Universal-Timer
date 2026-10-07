@@ -99,6 +99,19 @@ QPushButton:hover {
 @section SettingsNavChosen
 background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 0, 0, 0.5), stop:1 transparent); border-top: 3px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 0, 0, 0.75), stop:1 transparent); border-bottom: 3px solid qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 0, 0, 0.75), stop:1 transparent);
 
+/* 悬浮条隐藏规则集编辑窗口（输入框等控件沿用 SettingsContent 的样式） */
+@section HideRulesEditor
+#HideRulesEditor { background-color: rgb(25, 0, 0); border: 1px solid red; }
+#HideRulesEditorTitle { color: red; }
+#HideRuleGroup { border: 1px solid rgba(255, 0, 0, 0.5); }
+QPushButton:checked { background-color: rgba(255, 0, 0, 0.7); }
+QLabel, QCheckBox { color: white; }
+QScrollArea, #HideRuleGroups { background-color: transparent; border: none; }
+QScrollBar:vertical { background: transparent; width: 10px; }
+QScrollBar::handle:vertical { background: rgba(255, 0, 0, 0.5); min-height: 30px; border-radius: 5px; }
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; }
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: none; }
+
 /* 设置中心右侧的设置项 */
 @section SettingsContent
 QWidget {

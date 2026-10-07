@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QMessageBox>
+#include <QJsonDocument>
 
 ConfigManager::ConfigManager()
 {
@@ -36,6 +37,9 @@ void ConfigManager::read() {
         floating_bar.floating_bar_opacity = Settings.value("floating_bar_opacity", 100).toUInt();
         floating_bar.is_mouse_in_fading_enabled = Settings.value("is_mouse_in_fading_enabled", true).toBool();
         floating_bar.is_mouse_click_through_enabled = Settings.value("is_mouse_click_through_enabled", true).toBool();
+        floating_bar.floating_bar_hide_mode = static_cast<FloatingBarHideMode>(Settings.value("floating_bar_hide_mode", static_cast<int>(FloatingBarHideMode::Basic)).toInt());
+        floating_bar.hide_on_max_window = Settings.value("hide_on_max_window", false).toBool();
+        floating_bar.hide_on_fullscreen = Settings.value("hide_on_fullscreen", false).toBool();
         Settings.endGroup();
 
         Settings.beginGroup("reminder");
@@ -80,6 +84,14 @@ void ConfigManager::read() {
             event_point_list_file.close();
         }
 
+        QFile hide_rules_file("floating_bar_hide_rules.json");
+        if (hide_rules_file.open(QIODevice::ReadOnly)) {
+            const QJsonDocument document = QJsonDocument::fromJson(hide_rules_file.readAll());
+            if (document.isObject())
+                floating_bar.floating_bar_hide_rules = HideRuleset::fromJson(document.object());
+            hide_rules_file.close();
+        }
+
         qInfo() << "配置文件读取成功";
     }
 }
@@ -106,6 +118,9 @@ void ConfigManager::write() {
     Settings.setValue("floating_bar_opacity", floating_bar.floating_bar_opacity);
     Settings.setValue("is_mouse_in_fading_enabled", floating_bar.is_mouse_in_fading_enabled);
     Settings.setValue("is_mouse_click_through_enabled", floating_bar.is_mouse_click_through_enabled);
+    Settings.setValue("floating_bar_hide_mode", static_cast<int>(floating_bar.floating_bar_hide_mode));
+    Settings.setValue("hide_on_max_window", floating_bar.hide_on_max_window);
+    Settings.setValue("hide_on_fullscreen", floating_bar.hide_on_fullscreen);
     Settings.endGroup();
 
     Settings.beginGroup("reminder");
@@ -136,6 +151,12 @@ void ConfigManager::write() {
             out  << event_point_item.id() << ";" << event_point_item.time().toString("HH:mm:ss") << ";" << event_point_item.name() << ";" << event_point_item.advanceTime() << ";" << event_point_item.flashTimes() << Qt::endl;
         }
         event_point_list_file.close();
+    }
+
+    QFile hide_rules_file("floating_bar_hide_rules.json");
+    if (hide_rules_file.open(QIODevice::WriteOnly)) {
+        hide_rules_file.write(QJsonDocument(floating_bar.floating_bar_hide_rules.toJson()).toJson());
+        hide_rules_file.close();
     }
 
     if (Settings.status() != QSettings::NoError) {

@@ -28,6 +28,10 @@ set(PROJECT_SOURCES
     core/ConfigManager.cpp
     core/Global.h
     core/EventPoint.h
+    core/HideRules.h
+    core/HideRules.cpp
+    core/ForegroundWindow.h
+    core/ForegroundWindow.cpp
     core/ThemeManager.h
     core/ThemeManager.cpp
     ui/EventPointReminder.h
@@ -46,6 +50,8 @@ set(PROJECT_SOURCES
     ui/SettingsNav.cpp
     ui/SettingsContent.h
     ui/SettingsContent.cpp
+    ui/HideRulesEditor.h
+    ui/HideRulesEditor.cpp
     ui/WelcomePage.h
     ui/WelcomePage.cpp
     ui/AboutPage.h
@@ -79,3 +85,17 @@ target_link_libraries(${PROJECT_NAME}
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     $<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>
 )
+
+# 悬浮条隐藏规则在 Linux 上用 X11（libxcb）获取前台窗口；找不到 libxcb 时照常编译，只是前台窗口相关的规则不生效
+if(UNIX AND NOT APPLE)
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(XCB QUIET IMPORTED_TARGET xcb)
+    endif()
+    if(XCB_FOUND)
+        target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::XCB)
+        target_compile_definitions(${PROJECT_NAME} PRIVATE UT_HAVE_XCB)
+    else()
+        message(WARNING "没有找到 libxcb（Debian / Ubuntu 上可以安装 libxcb1-dev），悬浮条隐藏规则里和前台窗口有关的规则在 Linux 上不会生效")
+    endif()
+endif()

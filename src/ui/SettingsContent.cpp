@@ -1,5 +1,6 @@
 #include "core/Global.h"
 #include "ui/SettingsContent.h"
+#include "ui/HideRulesEditor.h"
 #include "core/ThemeManager.h"
 
 #include <QListView>
@@ -79,6 +80,14 @@ void SettingsContentClass::initializeObjects() {
     IsMouseInFadingCheckBox->setChecked(config.floating_bar.is_mouse_in_fading_enabled);
     IsMouseClickThroughCheckBox = new QCheckBox(tr("鼠标点击穿透"), FloatingBarSettingsPage);
     IsMouseClickThroughCheckBox->setChecked(config.floating_bar.is_mouse_click_through_enabled);
+    FloatingBarHideModeComboBox = new QComboBox(FloatingBarSettingsPage);
+    FloatingBarHideModeComboBox->addItems({tr("基础模式"), tr("高级模式（规则集）")});
+    FloatingBarHideModeComboBox->setCurrentIndex(config.floating_bar.floating_bar_hide_mode == FloatingBarHideMode::Advanced ? 1 : 0);
+    HideOnMaxWindowCheckBox = new QCheckBox(tr("前台是最大化窗口时隐藏"), FloatingBarSettingsPage);
+    HideOnMaxWindowCheckBox->setChecked(config.floating_bar.hide_on_max_window);
+    HideOnFullscreenCheckBox = new QCheckBox(tr("前台是全屏窗口时隐藏"), FloatingBarSettingsPage);
+    HideOnFullscreenCheckBox->setChecked(config.floating_bar.hide_on_fullscreen);
+    EditHideRulesButton = new QPushButton(tr("编辑规则集…"), FloatingBarSettingsPage);
 
     // Reminder
     IsShowReminderCheckBox = new QCheckBox(tr("是否显示全屏提醒"), ReminderSettingsPage);
@@ -112,6 +121,7 @@ void SettingsContentClass::initializeObjects() {
     for (QWidget* child : FloatingBarSettingsPage->findChildren<QWidget*>())
         if (child != IsShowFloatingBarCheckBox)
             child->setEnabled(config.floating_bar.is_show_floating_bar);
+    updateHideModeWidgets();
 
     for (QWidget* child : ReminderSettingsPage->findChildren<QWidget*>())
         if (child != IsShowReminderCheckBox)
@@ -135,6 +145,10 @@ void SettingsContentClass::initializeObjects() {
     FloatingBarSettingsPageLayout->addRow(tr("悬浮条不透明度："), FloatingBarOpacitySpinBox);
     FloatingBarSettingsPageLayout->addRow(IsMouseInFadingCheckBox);
     FloatingBarSettingsPageLayout->addRow(IsMouseClickThroughCheckBox);
+    FloatingBarSettingsPageLayout->addRow(tr("隐藏悬浮条："), FloatingBarHideModeComboBox);
+    FloatingBarSettingsPageLayout->addRow(HideOnMaxWindowCheckBox);
+    FloatingBarSettingsPageLayout->addRow(HideOnFullscreenCheckBox);
+    FloatingBarSettingsPageLayout->addRow(EditHideRulesButton);
     FloatingBarSettingsPageLayout->setContentsMargins(25, 25, 25, 25);
     FloatingBarSettingsPage->setLayout(FloatingBarSettingsPageLayout);
 
@@ -174,13 +188,11 @@ void SettingsContentClass::connectEmissions() {
     // FloatingBar
     connect(IsShowFloatingBarCheckBox, &QCheckBox::checkStateChanged, this, [this] {
         config.set(config.floating_bar.is_show_floating_bar, IsShowFloatingBarCheckBox->isChecked());
-        if (!config.floating_bar.is_show_floating_bar) {
-            FloatingBar->hide();
-        }
-        else FloatingBar->show();
+        FloatingBar->updateVisibility();
         for (QWidget* child : FloatingBarSettingsPage->findChildren<QWidget*>())
             if (child != IsShowFloatingBarCheckBox)
                 child->setEnabled(config.floating_bar.is_show_floating_bar);
+        updateHideModeWidgets();
         });
     connect(FloatingBarTextLineEdit, &QLineEdit::textChanged, this, [this](const QString& text) {
         config.set(config.floating_bar.floating_bar_text, text);
@@ -189,7 +201,7 @@ void SettingsContentClass::connectEmissions() {
         config.set(config.floating_bar.floating_bar_on_top, index == 0);
         FloatingBar->updateWindowFlags();
         FloatingBar->hide();
-        FloatingBar->show();
+        FloatingBar->updateVisibility();
 #ifdef Q_OS_WIN
         if (config.floating_bar.floating_bar_on_top) {
             QMessageBox::information(this, tr("提示"), tr("已设置悬浮条置顶，需要重新打开程序才可生效。"));
@@ -227,6 +239,21 @@ void SettingsContentClass::connectEmissions() {
         config.set(config.floating_bar.is_mouse_click_through_enabled, checked);
         FloatingBar->updateWindowFlags();
         });
+    connect(FloatingBarHideModeComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
+        config.set(config.floating_bar.floating_bar_hide_mode, index == 1 ? FloatingBarHideMode::Advanced : FloatingBarHideMode::Basic);
+        updateHideModeWidgets();
+        });
+    connect(HideOnMaxWindowCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        config.set(config.floating_bar.hide_on_max_window, checked);
+        });
+    connect(HideOnFullscreenCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        config.set(config.floating_bar.hide_on_fullscreen, checked);
+        });
+    connect(EditHideRulesButton, &QPushButton::clicked, this, [this] {
+        HideRulesEditorClass* editor = new HideRulesEditorClass(this, config, FloatingBar, EditHideRulesButton->font());
+        editor->setAttribute(Qt::WA_DeleteOnClose);
+        editor->open();
+        });
 
     // Reminder
     connect(IsShowReminderCheckBox, &QCheckBox::checkStateChanged, this, [this] {
@@ -254,6 +281,14 @@ void SettingsContentClass::connectEmissions() {
         emit clickedReminderPreviewButton();
         });
 
+}
+
+void SettingsContentClass::updateHideModeWidgets() {
+    const bool enabled = config.floating_bar.is_show_floating_bar;
+    const bool advanced = config.floating_bar.floating_bar_hide_mode == FloatingBarHideMode::Advanced;
+    HideOnMaxWindowCheckBox->setEnabled(enabled && !advanced);
+    HideOnFullscreenCheckBox->setEnabled(enabled && !advanced);
+    EditHideRulesButton->setEnabled(enabled && advanced);
 }
 
 void SettingsContentClass::resizeEvent(QResizeEvent* event) {

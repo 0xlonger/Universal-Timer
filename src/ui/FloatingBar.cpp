@@ -1,5 +1,6 @@
 #include "FloatingBar.h"
 #include "../core/ThemeManager.h"
+#include "../core/ForegroundWindow.h"
 
 #include <QRegularExpression>
 #include <QtMath>
@@ -29,6 +30,7 @@ FloatingBarClass::FloatingBarClass(ConfigManager& cfg, QWidget* parent)
 {
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool);
     this->setAttribute(Qt::WA_TranslucentBackground); // 设置窗口背景透明
+    this->setAttribute(Qt::WA_ShowWithoutActivating); // 显示时不抢焦点（按隐藏规则重新显示时不能打断正在用的窗口）
 
     Bar = new QLabel(this);
     Bar->setAlignment(Qt::AlignCenter);
@@ -44,6 +46,11 @@ FloatingBarClass::FloatingBarClass(ConfigManager& cfg, QWidget* parent)
     m_mouseTimer = new QTimer(this);
     m_mouseTimer->setInterval(50);
     connect(m_mouseTimer, &QTimer::timeout, this, &FloatingBarClass::updateMouseStatus);
+
+    m_hideRuleTimer = new QTimer(this);
+    m_hideRuleTimer->setInterval(500);
+    connect(m_hideRuleTimer, &QTimer::timeout, this, &FloatingBarClass::evaluateHideRules);
+    m_hideRuleTimer->start();
 }
 
 FloatingBarClass::~FloatingBarClass()
@@ -88,7 +95,8 @@ QMargins FloatingBarClass::shadowMargins(FloatingBarPosition position, unsigned 
 
 void FloatingBarClass::updateWindowFlags()
 {
-    Qt::WindowFlags flags = (config.floating_bar.floating_bar_on_top ? Qt::WindowStaysOnTopHint : Qt::WindowStaysOnBottomHint) | Qt::FramelessWindowHint | Qt::Tool;
+    // 悬浮条不接受焦点：否则它显示时会变成前台窗口，前台窗口相关的隐藏规则就会判断错
+    Qt::WindowFlags flags = (config.floating_bar.floating_bar_on_top ? Qt::WindowStaysOnTopHint : Qt::WindowStaysOnBottomHint) | Qt::FramelessWindowHint | Qt::Tool | Qt::WindowDoesNotAcceptFocus;
     if (config.floating_bar.is_mouse_click_through_enabled)
         flags |= Qt::WindowTransparentForInput; // 鼠标点击直接穿过悬浮条
     if (flags == this->windowFlags())
@@ -153,4 +161,40 @@ void FloatingBarClass::updateMouseStatus()
         m_isMouseIn = mouseIn;
         updateOpacity();
     }
+}
+
+void FloatingBarClass::evaluateHideRules()
+{
+    // 和 ClassIsland 一样：基础模式里勾选的条件任一满足就隐藏；高级模式按规则集判断，满足就隐藏
+    const auto& fb = config.floating_bar;
+    ForegroundWindowInfo window = queryForegroundWindow();
+    if (window.valid && !window.own)
+        m_lastForeignWindow = window;
+    if (window.own)
+        window = ForegroundWindowInfo(); // 万能倒计时自己的窗口在前台时，当作没有前台窗口（否则一打开全屏的设置中心悬浮条就被隐藏）
+
+    bool hidden = false;
+    if (fb.floating_bar_hide_mode == FloatingBarHideMode::Advanced) {
+        HideRuleContext context;
+        context.window = window;
+        context.now = QDateTime::currentDateTime();
+        context.remainingDays = context.now.secsTo(config.general.target_date_time) / 86400; // 和悬浮条上显示的天数一致
+        hidden = evaluateHideRuleset(config.floating_bar.floating_bar_hide_rules, context);
+        emit hideRulesEvaluated();
+    }
+    else if (fb.hide_on_max_window || fb.hide_on_fullscreen) {
+        hidden = (fb.hide_on_max_window && window.maximized) || (fb.hide_on_fullscreen && window.fullscreen);
+    }
+    if (hidden != m_isHiddenByRule) {
+        m_isHiddenByRule = hidden;
+        qInfo() << (hidden ? "满足隐藏规则，隐藏悬浮条" : "不再满足隐藏规则，显示悬浮条");
+        updateVisibility();
+    }
+}
+
+void FloatingBarClass::updateVisibility()
+{
+    const bool visible = config.floating_bar.is_show_floating_bar && !m_isHiddenByRule;
+    if (visible != this->isVisible())
+        this->setVisible(visible);
 }
