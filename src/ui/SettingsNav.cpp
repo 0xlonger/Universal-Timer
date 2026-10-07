@@ -14,6 +14,7 @@ SettingsNavClass::SettingsNavClass(QWidget* parent, SettingsContentClass* conten
     GeneralSettingsButton = new QPushButton(tr("总设置"), this);
     FloatingBarSettingsButton = new QPushButton(tr("悬浮条设置"), this);
     ReminderSettingsButton = new QPushButton(tr("全屏提醒设置"), this);
+    EventPointSettingsButton = new QPushButton(tr("事件点设置"), this);
     DonateButton = new QPushButton(tr("赞助"), this);
     AboutButton = new QPushButton(tr("关于"), this);
     CloseButton = new QPushButton(tr("关闭设置"), this);
@@ -27,6 +28,7 @@ SettingsNavClass::SettingsNavClass(QWidget* parent, SettingsContentClass* conten
     Layout->addWidget(GeneralSettingsButton);
     Layout->addWidget(FloatingBarSettingsButton);
     Layout->addWidget(ReminderSettingsButton);
+    Layout->addWidget(EventPointSettingsButton);
     Layout->addStretch();
     Layout->addWidget(DonateButton);
     Layout->addWidget(AboutButton);
@@ -51,6 +53,12 @@ SettingsNavClass::SettingsNavClass(QWidget* parent, SettingsContentClass* conten
         ChosenLabelMoveAnimation->setEndValue(ReminderSettingsButton->pos());
         ChosenLabelMoveAnimation->start();
         SettingsContent->setCurrentPage(SettingsContentClass::Page::ReminderSettingsPage);
+        });
+    connect(EventPointSettingsButton, &QPushButton::clicked, this, [this] {
+        ChosenLabelMoveAnimation->setStartValue(ChosenLabel->pos());
+        ChosenLabelMoveAnimation->setEndValue(EventPointSettingsButton->pos());
+        ChosenLabelMoveAnimation->start();
+        SettingsContent->setCurrentPage(SettingsContentClass::Page::EventPointSettingsPage);
         });
     connect(DonateButton, &QPushButton::clicked, this, [this] {
         ChosenLabelMoveAnimation->setStartValue(ChosenLabel->pos());

@@ -5,6 +5,8 @@
 #include "core/ThemeManager.h"
 
 #include <QTimer>
+#include <QGuiApplication>
+#include <QScreen>
 
 FullscreenPagesManager::FullscreenPagesManager(QWidget* parent, ConfigManager& cfg, FloatingBarClass* bar)
     : QWidget(parent), config(cfg), FloatingBar(bar)
@@ -114,6 +116,9 @@ void FullscreenPagesManager::showWelcome() {
 }
 
 void FullscreenPagesManager::startAnimation() {
+    // 设置中心留出任务栏的位置（只占屏幕的可用区域），全屏提醒和欢迎页仍然铺满整个屏幕
+    const QScreen* screen = QGuiApplication::primaryScreen();
+    this->setGeometry(fullscreen_pages_mode == FullscreenPagesMode::Settings ? screen->availableGeometry() : screen->geometry());
     this->setWindowOpacity(1);
     this->show();
     SlideInOutAnimationGroup->start();

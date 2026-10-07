@@ -52,6 +52,10 @@ set(PROJECT_SOURCES
     ui/SettingsContent.cpp
     ui/HideRulesEditor.h
     ui/HideRulesEditor.cpp
+    ui/ReminderTimeListEditor.h
+    ui/ReminderTimeListEditor.cpp
+    ui/EventPointListEditor.h
+    ui/EventPointListEditor.cpp
     ui/WelcomePage.h
     ui/WelcomePage.cpp
     ui/AboutPage.h
