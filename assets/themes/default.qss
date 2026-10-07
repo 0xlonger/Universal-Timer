@@ -2,6 +2,7 @@
  * 万能倒计时主题文件（默认主题）
  *
  * 主题文件放在程序目录（和 config.ini 同一个文件夹）的 themes 文件夹里，一个主题一个 .qss 文件。
+ * 内置主题（default.qss、win11.qss）会自动导出到这里；程序更新时，没改过的会自动换成新版，改过的保留不动。
  * 在“设置中心 → 总设置 → 主题”里选择；修改主题文件后，点托盘菜单的“刷新”重新加载。
  * 想做一个新主题：复制一份这个文件，改个文件名和下面的 @name，再改样式就行。
  *
@@ -14,7 +15,7 @@
  *
  * 程序提供的变量（按屏幕大小或设置算出来，已带单位 px）：
  *   FloatingBar：      @floating_bar_radius（设置里的悬浮条圆角半径）、@floating_bar_height（悬浮条高度）
- *   SettingsContent：  @settings_radius、@settings_padding、@settings_dropdown_width、@settings_spin_button_width
+ *   SettingsContent：  @settings_radius、@settings_padding、@settings_dropdown_width、@settings_spin_button_width、@settings_checkbox_size
  *   SettingsNav：      @nav_font_size、@nav_padding
  *
  * 悬浮条阴影（QSS 不支持阴影，由程序绘制）：定义下面这些变量就会显示阴影，不定义就没有阴影
@@ -148,6 +149,26 @@ QComboBox::drop-down, QDateTimeEdit::drop-down {
 QSpinBox::up-button, QSpinBox::down-button {
     width: @settings_spin_button_width;
     subcontrol-origin: border;
+}
+QCheckBox::indicator {
+    width: @settings_checkbox_size;
+    height: @settings_checkbox_size;
+    border: 2px solid rgba(255, 0, 0, 0.75);
+    border-radius: 3px;
+    background-color: transparent;
+}
+QCheckBox::indicator:hover {
+    background-color: rgba(255, 0, 0, 0.3);
+}
+QCheckBox::indicator:checked {
+    background-color: red;
+    image: url(:/images/theme/checkmark.png);
+}
+QCheckBox::indicator:disabled {
+    border-color: gray;
+}
+QCheckBox::indicator:checked:disabled {
+    background-color: gray;
 }
 QLineEdit, QComboBox, QSpinBox, QDateTimeEdit, QTextEdit, QPushButton {
     background-color: rgba(255, 0, 0, 0.25);

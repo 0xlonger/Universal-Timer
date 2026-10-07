@@ -7,9 +7,11 @@
 #include <QRegularExpression>
 #include <QStyleHints>
 #include <QDebug>
+#include <QCryptographicHash>
 
 static const QString THEMES_DIR = "themes";
 static const QString BUILT_IN_THEMES_DIR = ":/themes";
+static const QString PRISTINE_THEMES_DIR = "themes/.builtin"; // 导出时另存的原始副本
 
 ThemeManager& ThemeManager::instance()
 {
@@ -173,19 +175,61 @@ QString ThemeManager::style(const QString& section, const QHash<QString, QString
     return text;
 }
 
+// 规范化主题文件内容：去掉 \r，Windows 上检出的文件是 CRLF
+static QByteArray normalizedThemeContent(const QByteArray& content)
+{
+    QByteArray result = content;
+    result.replace("\r", "");
+    return result;
+}
+
+static QByteArray readFileContent(const QString& path)
+{
+    QFile file(path);
+    return file.open(QIODevice::ReadOnly) ? file.readAll() : QByteArray();
+}
+
+static bool writeFileContent(const QString& path, const QByteArray& content)
+{
+    QFile file(path);
+    return file.open(QIODevice::WriteOnly) && file.write(content) == content.size();
+}
+
 void ThemeManager::exportBuiltInThemes()
 {
-    if (QDir(THEMES_DIR).exists())
-        return;
-    if (!QDir().mkpath(THEMES_DIR)) {
+    // 以前版本导出的内置主题（规范化后的 SHA-256）。用户的文件和它们一样，说明导出后没改过，可以换成新版
+    static const QHash<QString, QStringList> OLD_BUILT_IN_THEMES = {
+        { "default.qss", { "1f388661a5304adc2f3c2d42ff4b7746691bd809062e0de867ce383af5c3866b" } },
+        { "win11.qss", { "122b7064e37746f9168eedb164946f16296e26d78e7daf7ecd426e5ac30be873" } },
+    };
+    if (!QDir().mkpath(PRISTINE_THEMES_DIR)) {
         qWarning() << "无法创建主题文件夹" << THEMES_DIR;
         return;
     }
     for (const QFileInfo& info : QDir(BUILT_IN_THEMES_DIR).entryInfoList({ "*.qss" }, QDir::Files)) {
-        QFile source(info.filePath());
-        QFile target(THEMES_DIR + "/" + info.fileName());
-        if (source.open(QIODevice::ReadOnly) && target.open(QIODevice::WriteOnly))
-            target.write(source.readAll());
+        const QByteArray builtIn = readFileContent(info.filePath());
+        const QString targetPath = THEMES_DIR + "/" + info.fileName();
+        const QString pristinePath = PRISTINE_THEMES_DIR + "/" + info.fileName();
+        bool update = !QFile::exists(targetPath);
+        if (!update) {
+            // 用户没改过（和导出时另存的原始副本一样，或者和以前版本的内置主题一样）才换成新版，改过的保留
+            const QByteArray current = normalizedThemeContent(readFileContent(targetPath));
+            if (current == normalizedThemeContent(builtIn))
+                update = false;
+            else if (QFile::exists(pristinePath))
+                update = current == normalizedThemeContent(readFileContent(pristinePath));
+            else
+                update = OLD_BUILT_IN_THEMES.value(info.fileName()).contains(QString::fromLatin1(QCryptographicHash::hash(current, QCryptographicHash::Sha256).toHex()));
+            if (!update && current != normalizedThemeContent(builtIn))
+                qInfo() << "主题文件" << targetPath << "改过，保留";
+        }
+        if (update) {
+            if (writeFileContent(targetPath, builtIn))
+                qInfo() << "已导出内置主题" << QFileInfo(targetPath).absoluteFilePath();
+            else
+                qWarning() << "无法导出内置主题" << targetPath;
+        }
+        if (normalizedThemeContent(readFileContent(pristinePath)) != normalizedThemeContent(builtIn))
+            writeFileContent(pristinePath, builtIn); // 原始副本，下次启动时用来判断用户有没有改过
     }
-    qInfo() << "已把内置主题导出到" << QDir(THEMES_DIR).absolutePath();
 }

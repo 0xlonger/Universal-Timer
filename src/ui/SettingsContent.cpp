@@ -311,5 +311,6 @@ void SettingsContentClass::applyTheme() {
         { "settings_padding", QString("%1px").arg((unit / GOLDEN_RATIO_INV - unit) / 2) },
         { "settings_dropdown_width", QString("%1px").arg(unit / GOLDEN_RATIO_INV) },
         { "settings_spin_button_width", QString("%1px").arg(unit / GOLDEN_RATIO_INV / 2) },
+        { "settings_checkbox_size", QString("%1px").arg(qRound(this->height() * 0.02)) }, // 复选框方框边长，比字号（高度的 0.025）略小
         }));
 }

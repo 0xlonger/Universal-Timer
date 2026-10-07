@@ -34,7 +34,7 @@ public:
     QString style(const QString& section, const QHash<QString, QString>& vars = {}) const;
     QString variable(const QString& name) const; // 主题变量的值（已按系统深浅色选好），没有时为空
 
-    static void exportBuiltInThemes(); // themes/ 文件夹不存在时，把内置主题导出到那里，方便照着修改
+    static void exportBuiltInThemes(); // 把内置主题导出到 themes/ 文件夹，方便照着修改；已导出但没改过的会换成新版
 
 Q_SIGNALS:
     void changed(); // 主题重新读取了，或系统深浅色变了，需要重新设置样式表

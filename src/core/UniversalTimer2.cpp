@@ -18,7 +18,7 @@ UniversalTimer2::UniversalTimer2(QObject* parent)
     desktop = QApplication::primaryScreen()->geometry();
 
     // Theme
-    ThemeManager::exportBuiltInThemes(); // 第一次运行时把内置主题导出到 themes 文件夹，方便修改
+    ThemeManager::exportBuiltInThemes(); // 把内置主题导出到 themes 文件夹，方便修改；已导出但没改过的换成新版
     ThemeManager::instance().load(config.general.theme);
 
     // Floating Bar
