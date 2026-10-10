@@ -26,6 +26,7 @@ private:
     // 更新
     void updateFloatingBar(); // 更新悬浮条
     void updateObjects(); // 更新对象
+    void scheduleNextUpdate(); // 安排下一次更新：下一个整 update_interval 刚过 50ms
 
 
     // 屏幕分辨率

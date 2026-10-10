@@ -73,6 +73,16 @@ private:
     QComboBox* FloatingBarPositionComboBox;
     QSpinBox* FloatingBarHeightSpinBox;
     QSpinBox* FloatingBarBorderRadiusSpinBox;
+    QSpinBox* FloatingBarTopMarginSpinBox;
+    QSpinBox* FloatingBarOpacitySpinBox;
+    QCheckBox* IsMouseInFadingCheckBox;
+    QCheckBox* IsMouseClickThroughCheckBox;
+    QComboBox* FloatingBarHideModeComboBox;
+    QCheckBox* HideOnMaxWindowCheckBox;
+    QCheckBox* HideOnFullscreenCheckBox;
+    QPushButton* EditHideRulesButton;
+
+    void updateHideModeWidgets(); // 基础模式只能改两个勾选项，高级模式只能编辑规则集
 
     // Reminder
     QCheckBox* IsShowReminderCheckBox;
