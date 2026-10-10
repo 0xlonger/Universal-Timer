@@ -36,6 +36,7 @@ private:
     QPushButton* GeneralSettingsButton;
     QPushButton* FloatingBarSettingsButton;
     QPushButton* ReminderSettingsButton;
+    QPushButton* EventPointSettingsButton;
     QPushButton* DonateButton;
     QPushButton* AboutButton;
     QPushButton* CloseButton;

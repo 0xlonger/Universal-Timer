@@ -5,6 +5,8 @@
 
 #include <QListView>
 #include <QFormLayout>
+#include <QVBoxLayout>
+#include <QLabel>
 #include <QMessageBox>
 
 SettingsContentClass::SettingsContentClass(QWidget* parent, ConfigManager& cfg, FloatingBarClass* bar)
@@ -25,6 +27,7 @@ void SettingsContentClass::setCurrentPage(const Page& page) {
         case Page::GeneralSettingsPage: this->setCurrentWidget(GeneralSettingsPage); break;
         case Page::FloatingBarSettingsPage: this->setCurrentWidget(FloatingBarSettingsPage); break;
         case Page::ReminderSettingsPage: this->setCurrentWidget(ReminderSettingsPage); break;
+        case Page::EventPointSettingsPage: this->setCurrentWidget(EventPointSettingsPage); break;
         case Page::DonatePage: this->setCurrentWidget(DonatePage); break;
         case Page::AboutPage: this->setCurrentWidget(AboutPage); break;
     }
@@ -35,6 +38,7 @@ void SettingsContentClass::initializeObjects() {
     GeneralSettingsPage = new QWidget(this);
     FloatingBarSettingsPage = new QWidget(this);
     ReminderSettingsPage = new QWidget(this);
+    EventPointSettingsPage = new QWidget(this);
     DonatePage = new DonatePageClass(this);
     AboutPage = new AboutPageClass(this);
 
@@ -111,6 +115,10 @@ void SettingsContentClass::initializeObjects() {
     ReminderBlockShowTimesSpinBox->setValue(config.reminder.block_show_times);
     ReminderBlockShowTimesSpinBox->setSuffix(tr(" 次")); // 提醒音播放次数和方块闪烁次数后缀文本
     ReminderPreviewButton= new QPushButton(tr("预览"), ReminderSettingsPage);
+    ReminderTimeListEditor = new ReminderTimeListEditorClass(ReminderSettingsPage, config);
+
+    // EventPoint
+    EventPointListEditor = new EventPointListEditorClass(EventPointSettingsPage, config);
 
     for (QComboBox* child : this->findChildren<QComboBox*>()) {
         QListView* ListView = new QListView(child);
@@ -160,13 +168,22 @@ void SettingsContentClass::initializeObjects() {
     ReminderSettingsPageLayout->addRow(ReminderRemainingDaysToPlayHeartbeatSoundSpinBox);
     ReminderSettingsPageLayout->addRow(tr("提醒音播放次数和方块闪烁次数："), ReminderBlockShowTimesSpinBox);
     ReminderSettingsPageLayout->addRow(ReminderPreviewButton);
+    ReminderSettingsPageLayout->addRow(new QLabel(tr("提醒时间（每天到这些时间时显示全屏提醒）："), ReminderSettingsPage));
+    ReminderSettingsPageLayout->addRow(ReminderTimeListEditor);
     ReminderSettingsPageLayout->setContentsMargins(25, 25, 25, 25);
     ReminderSettingsPage->setLayout(ReminderSettingsPageLayout);
+
+    QVBoxLayout* EventPointSettingsPageLayout = new QVBoxLayout(EventPointSettingsPage);
+    EventPointSettingsPageLayout->addWidget(new QLabel(tr("事件点（每天到事件点前显示倒数胶囊，到点时显示事件点全屏提醒）："), EventPointSettingsPage));
+    EventPointSettingsPageLayout->addWidget(EventPointListEditor, 1);
+    EventPointSettingsPageLayout->setContentsMargins(25, 25, 25, 25);
+    EventPointSettingsPage->setLayout(EventPointSettingsPageLayout);
 
     this->addWidget(new QWidget(this));
     this->addWidget(GeneralSettingsPage);
     this->addWidget(FloatingBarSettingsPage);
     this->addWidget(ReminderSettingsPage);
+    this->addWidget(EventPointSettingsPage);
     this->addWidget(DonatePage);
     this->addWidget(AboutPage);
     this->setCurrentPage(Page::None);

@@ -4,6 +4,8 @@
 #include "ui/FloatingBar.h"
 #include "ui/DonatePage.h"
 #include "ui/AboutPage.h"
+#include "ui/ReminderTimeListEditor.h"
+#include "ui/EventPointListEditor.h"
 
 #include <QStackedWidget>
 #include <QWidget>
@@ -28,6 +30,7 @@ public:
         GeneralSettingsPage,
         FloatingBarSettingsPage,
         ReminderSettingsPage,
+        EventPointSettingsPage,
         DonatePage,
         AboutPage
     };
@@ -57,6 +60,7 @@ private:
     QWidget* GeneralSettingsPage;
     QWidget* FloatingBarSettingsPage;
     QWidget* ReminderSettingsPage;
+    QWidget* EventPointSettingsPage;
     DonatePageClass* DonatePage;
     AboutPageClass* AboutPage;
 
@@ -92,6 +96,10 @@ private:
     QSpinBox* ReminderRemainingDaysToPlayHeartbeatSoundSpinBox;
     QSpinBox* ReminderBlockShowTimesSpinBox;
     QPushButton* ReminderPreviewButton;
+    ReminderTimeListEditorClass* ReminderTimeListEditor;
+
+    // EventPoint
+    EventPointListEditorClass* EventPointListEditor;
 
 
 };
