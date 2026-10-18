@@ -8,7 +8,7 @@ inline constexpr double GOLDEN_RATIO_INV = 1.0 / std::numbers::phi; // 黄金比
 
 inline int left_time = 0; // 剩余时间
 
-inline const QString CURRENT_VERSION_STRING("2.2.0");
+inline const QString CURRENT_VERSION_STRING("2.3.0");
 
 inline const QString GITHUB_RELEASE_URL("https://github.com/0xlonger/Universal-Timer/releases/");
 

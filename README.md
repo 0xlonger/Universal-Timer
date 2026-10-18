@@ -9,7 +9,7 @@
 
 ![GPLv3 License](https://img.shields.io/badge/license-GPLv3-blue.svg)
 ![Qt](https://img.shields.io/badge/Qt-6.10.1-green.svg)
-![Version](https://img.shields.io/badge/version-2.2.0-orange)
+![Version](https://img.shields.io/badge/version-2.3.0-orange)
 
 **万能倒计时**（原项目名 UniversalTimer2）是一个基于 Qt 的强大且可定制的倒计时应用程序。它通过在悬浮条中显示剩余时间，并提供带有动画和音效的全屏提醒，帮助您追踪重要事件。
 
