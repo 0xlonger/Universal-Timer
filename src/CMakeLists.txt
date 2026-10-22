@@ -58,6 +58,8 @@ set(PROJECT_SOURCES
     ui/EventPointListEditor.cpp
     ui/WelcomePage.h
     ui/WelcomePage.cpp
+    ui/OnboardingWizard.h
+    ui/OnboardingWizard.cpp
     ui/AboutPage.h
     ui/AboutPage.cpp
     ui/DonatePage.h

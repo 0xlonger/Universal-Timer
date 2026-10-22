@@ -25,6 +25,7 @@ void ConfigManager::read() {
         general.language = Settings.value("language", "zh-CN").toString();
         general.theme = Settings.value("theme", "default").toString();
         general.time_offset = Settings.value("time_offset", 0).toInt();
+        general.is_onboarding_finished = Settings.value("is_onboarding_finished", true).toBool();
         Settings.endGroup();
 
         Settings.beginGroup("floating_bar");
@@ -107,6 +108,7 @@ void ConfigManager::write() {
     Settings.setValue("language", general.language);
     Settings.setValue("theme", general.theme);
     Settings.setValue("time_offset", general.time_offset);
+    Settings.setValue("is_onboarding_finished", general.is_onboarding_finished);
     Settings.endGroup();
 
     Settings.beginGroup("floating_bar");

@@ -116,6 +116,17 @@ QScrollBar::handle:vertical { background: rgba(255, 0, 0, 0.5); min-height: 30px
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; }
 QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: none; }
 
+/* 第一次打开时的引导（输入框、按钮等控件沿用 SettingsContent 的样式，可以用 @settings_radius 等变量） */
+@section OnboardingWizard
+QStackedWidget { border: none; }
+#OnboardingStepNumber { color: red; }
+#OnboardingSubtitle { color: rgb(170, 160, 160); }
+#OnboardingLanguage { color: red; }
+#OnboardingNextButton { background-color: rgba(255, 0, 0, 0.55); }
+#OnboardingNextButton:hover { background-color: rgba(255, 0, 0, 0.7); }
+#OnboardingNextButton:pressed { background-color: rgba(255, 0, 0, 0.85); }
+#OnboardingPreviewDesk { background-color: rgb(20, 32, 44); border-radius: @settings_radius; }
+
 /* 设置中心右侧的设置项 */
 @section SettingsContent
 QWidget {

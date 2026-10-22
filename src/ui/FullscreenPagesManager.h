@@ -18,7 +18,10 @@ public:
 
     void showReminder();
     void showSettings();
-    void showWelcome();
+    void showWelcome(); // 显示欢迎页和引导
+
+Q_SIGNALS:
+    void onboardingFinished(); // 引导走完并淡出了
 
 protected:
     void resizeEvent(QResizeEvent* event) override;

@@ -48,6 +48,9 @@ void SettingsContentClass::initializeObjects() {
     TargetDateTimeEdit->setCalendarPopup(true);
     TargetDateTimeEdit->setDisplayFormat("yyyy-MM-dd HH:mm:ss"); // 设置显示格式
     LanguageComboBox = new QComboBox(GeneralSettingsPage);
+    for (const auto& [code, name] : AVAILABLE_LANGUAGES)
+        LanguageComboBox->addItem(name, code);
+    LanguageComboBox->setCurrentIndex(qMax(0, LanguageComboBox->findData(config.general.language)));
     ThemeComboBox = new QComboBox(GeneralSettingsPage);
     for (const ThemeManager::ThemeInfo& theme : ThemeManager::instance().themes())
         ThemeComboBox->addItem(theme.name, theme.id);
@@ -202,6 +205,9 @@ void SettingsContentClass::connectEmissions() {
         config.set(config.general.target_date_time, date_time);
         });
     // todo)) update_interval...
+    connect(LanguageComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
+        config.set(config.general.language, LanguageComboBox->itemData(index).toString());
+        });
     connect(TimeOffsetSpinBox, &QSpinBox::valueChanged, this, [this](int value) {
         config.set(config.general.time_offset, value);
         });

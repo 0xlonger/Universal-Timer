@@ -1,7 +1,7 @@
 #include "ui/FullscreenPagesManager.h"
 #include "ui/ReminderPage.h"
 #include "ui/SettingsPage.h"
-#include "ui/WelcomePage.h"
+#include "ui/OnboardingWizard.h"
 #include "core/ThemeManager.h"
 
 #include <QTimer>
@@ -71,14 +71,16 @@ FullscreenPagesManager::FullscreenPagesManager(QWidget* parent, ConfigManager& c
                 break;
             }
             case FullscreenPagesMode::Welcome: {
-                WelcomePageClass* WelcomePage = new WelcomePageClass(this);
-                WelcomePage->resize(this->size());
+                // 第一次打开：欢迎页和引导
+                OnboardingWizardClass* OnboardingWizard = new OnboardingWizardClass(this, config);
+                OnboardingWizard->resize(this->size());
                 SlideAnimationWidget->raise();
                 BackgroundWidget->show();
-                WelcomePage->show();
-                connect(WelcomePage, &WelcomePageClass::finished, this, [this, WelcomePage] {
+                OnboardingWizard->show();
+                connect(OnboardingWizard, &OnboardingWizardClass::finished, this, [this, OnboardingWizard] {
                     FadeOutAnimation->start();
-                    connect(FadeOutAnimation, &QPropertyAnimation::finished, WelcomePage, &WelcomePageClass::deleteLater, Qt::SingleShotConnection);
+                    connect(FadeOutAnimation, &QPropertyAnimation::finished, OnboardingWizard, &OnboardingWizardClass::deleteLater, Qt::SingleShotConnection);
+                    connect(FadeOutAnimation, &QPropertyAnimation::finished, this, &FullscreenPagesManager::onboardingFinished, Qt::SingleShotConnection); // 引导淡出后再显示悬浮条
                     }, Qt::SingleShotConnection);
                 break;
             }
@@ -116,9 +118,10 @@ void FullscreenPagesManager::showWelcome() {
 }
 
 void FullscreenPagesManager::startAnimation() {
-    // 设置中心留出任务栏的位置（只占屏幕的可用区域），全屏提醒和欢迎页仍然铺满整个屏幕
+    // 设置中心和引导留出任务栏的位置（只占屏幕的可用区域），全屏提醒仍然铺满整个屏幕
     const QScreen* screen = QGuiApplication::primaryScreen();
-    this->setGeometry(fullscreen_pages_mode == FullscreenPagesMode::Settings ? screen->availableGeometry() : screen->geometry());
+    const bool leaveTaskbar = fullscreen_pages_mode == FullscreenPagesMode::Settings || fullscreen_pages_mode == FullscreenPagesMode::Welcome;
+    this->setGeometry(leaveTaskbar ? screen->availableGeometry() : screen->geometry());
     this->setWindowOpacity(1);
     this->show();
     SlideInOutAnimationGroup->start();

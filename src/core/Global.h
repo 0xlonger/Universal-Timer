@@ -3,10 +3,14 @@
 #include <numbers>
 
 #include <QString>
+#include <QList>
+#include <QPair>
 
 inline constexpr double GOLDEN_RATIO_INV = 1.0 / std::numbers::phi; // 黄金比例倒数
 
 inline int left_time = 0; // 剩余时间
+
+inline const QList<QPair<QString, QString>> AVAILABLE_LANGUAGES = { { "zh-CN", "简体中文" } }; // 可以选的语言：代码和名称（名称用这种语言自己写）
 
 inline const QString CURRENT_VERSION_STRING("2.3.0");
 

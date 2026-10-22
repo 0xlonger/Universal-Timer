@@ -33,6 +33,9 @@ UniversalTimer2::UniversalTimer2(QObject* parent)
     FullscreenPages = new FullscreenPagesManager(nullptr, config, FloatingBar);
     FullscreenPages->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool);
     FullscreenPages->resize(desktop.size());
+    connect(FullscreenPages, &FullscreenPagesManager::onboardingFinished, this, [this] {
+        FloatingBar->setHiddenForOnboarding(false); // 引导走完，显示悬浮条
+        });
 
     // About Page
     AboutPage = new AboutPageClass;
@@ -116,10 +119,15 @@ void UniversalTimer2::refresh() {
     left_time = QDateTime::currentDateTime().secsTo(config.general.target_date_time);
 
     if (!QFile::exists("config.ini")) {
-        FullscreenPages->showWelcome();
+        config.general.is_onboarding_finished = false; // 第一次打开，要走一遍引导
         config.write();
     }
     else config.read();
+    // 引导没走完（第一次打开，或者上次走到一半就关了）：显示引导，走完之前不显示悬浮条
+    if (!config.general.is_onboarding_finished) {
+        FloatingBar->setHiddenForOnboarding(true);
+        FullscreenPages->showWelcome();
+    }
 
     // Theme：重新读取主题文件，改了主题文件后点“刷新”即可生效
     ThemeManager::instance().load(config.general.theme);
@@ -146,7 +154,7 @@ void UniversalTimer2::refresh() {
 // 悬浮条更新函数
 void UniversalTimer2::updateFloatingBar() {
     // 更新标签文本
-    FloatingBar->Bar->setText(" " + config.floating_bar.floating_bar_text + QString::number(left_time / 86400) + tr("天", "Floating Bar") + QString::number((left_time % 86400) / 3600) + tr("时") + QString::number((left_time % 3600) / 60) + tr("分") + QString::number(left_time % 60) + tr("秒 "));
+    FloatingBar->Bar->setText(FloatingBarClass::barText(config.floating_bar.floating_bar_text, left_time));
 
     // 更新大小
     FloatingBar->Bar->adjustSize();
