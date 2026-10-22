@@ -69,6 +69,7 @@ private:
     QDateTimeEdit* TargetDateTimeEdit;
     QComboBox* LanguageComboBox;
     QComboBox* ThemeComboBox;
+    QSpinBox* TimeOffsetSpinBox;
 
     // Floating Bar
     QCheckBox* IsShowFloatingBarCheckBox;

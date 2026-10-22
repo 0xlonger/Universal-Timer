@@ -176,17 +176,18 @@ void UniversalTimer2::updateObjects() {
     if (config.floating_bar.is_show_floating_bar) {
         updateFloatingBar();
     }
+    // 定时全屏提醒和事件点按“当前时间 + 时间偏移”判断，时间偏移用来对齐学校的铃声（正数提前、负数推后）
+    const QTime offset_time = QTime::currentTime().addSecs(config.general.time_offset);
+    const QTime current_time(offset_time.hour(), offset_time.minute(), offset_time.second());
     // 定时显示全屏提醒
     if (config.reminder.is_show_reminder) {
-        QTime current_time = QTime::currentTime();
-        if (config.reminder.reminder_time_list.contains(QTime(current_time.hour(), current_time.minute(), current_time.second()))) {
+        if (config.reminder.reminder_time_list.contains(current_time)) {
             FullscreenPages->showReminder();
         }
     }
     // 定时显示事件点提醒
     for (EventPoint& event_point_item : config.event_point.event_point_list) {
-        QTime current_time = QTime::currentTime();
-        if (QTime(current_time.hour(), current_time.minute(), current_time.second()) == event_point_item.time().addSecs(-event_point_item.advanceTime() - 1) && !event_point_item.isShowing()) {
+        if (current_time == event_point_item.time().addSecs(-event_point_item.advanceTime() - 1) && !event_point_item.isShowing()) {
             event_point_item.setShowing(true);
             EventPointReminder* event_point_reminder = new EventPointReminder(nullptr, event_point_item);
             event_point_reminder->setAttribute(Qt::WA_DeleteOnClose);

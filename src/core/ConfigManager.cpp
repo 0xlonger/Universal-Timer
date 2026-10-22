@@ -24,6 +24,7 @@ void ConfigManager::read() {
         general.update_interval = Settings.value("update_interval", 1000).toInt();
         general.language = Settings.value("language", "zh-CN").toString();
         general.theme = Settings.value("theme", "default").toString();
+        general.time_offset = Settings.value("time_offset", 0).toInt();
         Settings.endGroup();
 
         Settings.beginGroup("floating_bar");
@@ -105,6 +106,7 @@ void ConfigManager::write() {
     Settings.setValue("update_interval", general.update_interval);
     Settings.setValue("language", general.language);
     Settings.setValue("theme", general.theme);
+    Settings.setValue("time_offset", general.time_offset);
     Settings.endGroup();
 
     Settings.beginGroup("floating_bar");

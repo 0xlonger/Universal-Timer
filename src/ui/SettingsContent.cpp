@@ -52,6 +52,11 @@ void SettingsContentClass::initializeObjects() {
     for (const ThemeManager::ThemeInfo& theme : ThemeManager::instance().themes())
         ThemeComboBox->addItem(theme.name, theme.id);
     ThemeComboBox->setCurrentIndex(qMax(0, ThemeComboBox->findData(ThemeManager::instance().currentId())));
+    TimeOffsetSpinBox = new QSpinBox(GeneralSettingsPage);
+    TimeOffsetSpinBox->setRange(-86399, 86399);
+    TimeOffsetSpinBox->setValue(config.general.time_offset);
+    TimeOffsetSpinBox->setSuffix(tr(" 秒（正数让提醒提前，负数推后）")); // 时间偏移后缀文本
+    TimeOffsetSpinBox->setToolTip(tr("和 ClassIsland 的时间偏移一样，用来对齐学校的铃声：铃声比电脑时间快几秒就填几，慢几秒就填负几。\n只影响事件点和定时全屏提醒，悬浮条上的倒计时不变。"));
 
     // Floating Bar
     IsShowFloatingBarCheckBox = new QCheckBox(tr("是否显示悬浮条"), FloatingBarSettingsPage);
@@ -139,6 +144,7 @@ void SettingsContentClass::initializeObjects() {
     GeneralSettingsPageLayout->addRow(tr("目标时间："), TargetDateTimeEdit);
     GeneralSettingsPageLayout->addRow(tr("语言："), LanguageComboBox);
     GeneralSettingsPageLayout->addRow(tr("主题："), ThemeComboBox);
+    GeneralSettingsPageLayout->addRow(tr("时间偏移："), TimeOffsetSpinBox);
     GeneralSettingsPageLayout->setContentsMargins(25, 25, 25, 25);
     GeneralSettingsPage->setLayout(GeneralSettingsPageLayout);
 
@@ -196,6 +202,9 @@ void SettingsContentClass::connectEmissions() {
         config.set(config.general.target_date_time, date_time);
         });
     // todo)) update_interval...
+    connect(TimeOffsetSpinBox, &QSpinBox::valueChanged, this, [this](int value) {
+        config.set(config.general.time_offset, value);
+        });
     connect(ThemeComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
         config.set(config.general.theme, ThemeComboBox->itemData(index).toString());
         ThemeManager::instance().load(config.general.theme);

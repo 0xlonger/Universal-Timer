@@ -29,6 +29,7 @@ private:
         unsigned update_interval = 1000; // 更新间隔时间，默认1秒
         QString language = "zh-CN"; // 语言，默认中文
         QString theme = "default"; // 主题（themes 文件夹里的文件名，不含 .qss），默认“默认”主题
+        int time_offset = 0; // 时间偏移（秒），事件点和定时全屏提醒按“当前时间 + 偏移”判断，正数提前、负数推后，默认0
     };
 
     struct FloatingBarConfigItems {
