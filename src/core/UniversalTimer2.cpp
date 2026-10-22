@@ -12,6 +12,8 @@
 #include <QMenu>
 #include <QSignalBlocker>
 
+#include <cmath>
+
 UniversalTimer2::UniversalTimer2(QObject* parent)
     : QObject(parent)
 {
@@ -99,6 +101,13 @@ UniversalTimer2::UniversalTimer2(QObject* parent)
         scheduleNextUpdate();
         });
     scheduleNextUpdate();
+    reminder_timer.setSingleShot(true);
+    reminder_timer.setTimerType(Qt::PreciseTimer);
+    connect(&reminder_timer, &QTimer::timeout, this, [this] {
+        checkReminders();
+        scheduleNextReminderCheck();
+        });
+    scheduleNextReminderCheck();
 
 }
 
@@ -123,6 +132,7 @@ void UniversalTimer2::refresh() {
         config.write();
     }
     else config.read();
+    applyTimeAutoAdjust();
     // 引导没走完（第一次打开，或者上次走到一半就关了）：显示引导，走完之前不显示悬浮条
     if (!config.general.is_onboarding_finished) {
         FloatingBar->setHiddenForOnboarding(true);
@@ -189,14 +199,46 @@ void UniversalTimer2::scheduleNextUpdate() {
     timer.start(interval - now % interval + 50);
 }
 
+// 安排下一次检查提醒：和 scheduleNextUpdate 一样避开整秒，但对齐的是加上时间偏移后的整秒（偏移有小数时，提醒要在偏移后的整秒触发）
+void UniversalTimer2::scheduleNextReminderCheck() {
+    const int interval = qMax(1, int(config.general.update_interval));
+    const int now = offsetTime().msecsSinceStartOfDay();
+    reminder_timer.start(interval - now % interval + 50);
+}
+
+// 加上时间偏移后的当前时间，时间偏移用来对齐学校的铃声（正数提前、负数推后）
+QTime UniversalTimer2::offsetTime() const {
+    return QTime::currentTime().addMSecs(int(qRound64(config.general.time_offset * 1000)));
+}
+
+// 自动时间偏移（和 ClassIsland 一样）：开启时每过一天，时间偏移加上设定的增量
+// 启动时补上没开程序那几天的量；程序开着过了零点也会加。不管开没开，都记下今天已经算过，免得刚打开开关时把以前的天数也算进去
+void UniversalTimer2::applyTimeAutoAdjust() {
+    const QDate today = QDate::currentDate();
+    const QDate last = config.general.last_time_adjust_date;
+    if (last == today)
+        return;
+    const qint64 days = last.isValid() ? last.daysTo(today) : 0;
+    if (config.general.is_time_auto_adjust_enabled && days > 0) {
+        const double offset = config.general.time_offset + config.general.time_auto_adjust_seconds * days;
+        config.general.time_offset = qBound(-86399.999, std::round(offset * 1000) / 1000, 86399.999);
+        qInfo() << "自动时间偏移：过了" << days << "天，时间偏移调整为" << config.general.time_offset << "秒";
+    }
+    config.set(config.general.last_time_adjust_date, today);
+}
+
 // 更新函数
 void UniversalTimer2::updateObjects() {
     left_time = QDateTime::currentDateTime().secsTo(config.general.target_date_time);
     if (config.floating_bar.is_show_floating_bar) {
         updateFloatingBar();
     }
-    // 定时全屏提醒和事件点按“当前时间 + 时间偏移”判断，时间偏移用来对齐学校的铃声（正数提前、负数推后）
-    const QTime offset_time = QTime::currentTime().addSecs(config.general.time_offset);
+}
+
+// 检查提醒：定时全屏提醒和事件点按加上时间偏移后的时间判断
+void UniversalTimer2::checkReminders() {
+    applyTimeAutoAdjust(); // 开着程序过了零点
+    const QTime offset_time = offsetTime();
     const QTime current_time(offset_time.hour(), offset_time.minute(), offset_time.second());
     // 定时显示全屏提醒
     if (config.reminder.is_show_reminder) {

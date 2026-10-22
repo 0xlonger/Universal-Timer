@@ -55,11 +55,23 @@ void SettingsContentClass::initializeObjects() {
     for (const ThemeManager::ThemeInfo& theme : ThemeManager::instance().themes())
         ThemeComboBox->addItem(theme.name, theme.id);
     ThemeComboBox->setCurrentIndex(qMax(0, ThemeComboBox->findData(ThemeManager::instance().currentId())));
-    TimeOffsetSpinBox = new QSpinBox(GeneralSettingsPage);
-    TimeOffsetSpinBox->setRange(-86399, 86399);
+    TimeOffsetSpinBox = new QDoubleSpinBox(GeneralSettingsPage);
+    TimeOffsetSpinBox->setDecimals(3);
+    TimeOffsetSpinBox->setRange(-86399.999, 86399.999);
     TimeOffsetSpinBox->setValue(config.general.time_offset);
     TimeOffsetSpinBox->setSuffix(tr(" 秒（正数让提醒提前，负数推后）")); // 时间偏移后缀文本
     TimeOffsetSpinBox->setToolTip(tr("和 ClassIsland 的时间偏移一样，用来对齐学校的铃声：铃声比电脑时间快几秒就填几，慢几秒就填负几。\n只影响事件点和定时全屏提醒，悬浮条上的倒计时不变。"));
+    TimeAutoAdjustCheckBox = new QCheckBox(tr("每天自动调整时间偏移"), GeneralSettingsPage);
+    TimeAutoAdjustCheckBox->setChecked(config.general.is_time_auto_adjust_enabled);
+    TimeAutoAdjustCheckBox->setToolTip(tr("和 ClassIsland 的自动时间偏移一样：开启后每过一天，时间偏移自动加上下面设定的增量。\n用来抵消学校铃声每天慢慢跑偏，比如铃声每天比电脑多快 0.3 秒，就填 0.3。"));
+    TimeAutoAdjustSpinBox = new QDoubleSpinBox(GeneralSettingsPage);
+    TimeAutoAdjustSpinBox->setDecimals(3);
+    TimeAutoAdjustSpinBox->setRange(-3600, 3600);
+    TimeAutoAdjustSpinBox->setSingleStep(0.1);
+    TimeAutoAdjustSpinBox->setValue(config.general.time_auto_adjust_seconds);
+    TimeAutoAdjustSpinBox->setPrefix(tr("时间偏移每天加 ")); // 自动时间偏移增量前缀文本
+    TimeAutoAdjustSpinBox->setSuffix(tr(" 秒")); // 自动时间偏移增量后缀文本
+    TimeAutoAdjustSpinBox->setEnabled(config.general.is_time_auto_adjust_enabled);
 
     // Floating Bar
     IsShowFloatingBarCheckBox = new QCheckBox(tr("是否显示悬浮条"), FloatingBarSettingsPage);
@@ -148,6 +160,8 @@ void SettingsContentClass::initializeObjects() {
     GeneralSettingsPageLayout->addRow(tr("语言："), LanguageComboBox);
     GeneralSettingsPageLayout->addRow(tr("主题："), ThemeComboBox);
     GeneralSettingsPageLayout->addRow(tr("时间偏移："), TimeOffsetSpinBox);
+    GeneralSettingsPageLayout->addRow(TimeAutoAdjustCheckBox);
+    GeneralSettingsPageLayout->addRow(TimeAutoAdjustSpinBox);
     GeneralSettingsPageLayout->setContentsMargins(25, 25, 25, 25);
     GeneralSettingsPage->setLayout(GeneralSettingsPageLayout);
 
@@ -208,8 +222,15 @@ void SettingsContentClass::connectEmissions() {
     connect(LanguageComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
         config.set(config.general.language, LanguageComboBox->itemData(index).toString());
         });
-    connect(TimeOffsetSpinBox, &QSpinBox::valueChanged, this, [this](int value) {
+    connect(TimeOffsetSpinBox, &QDoubleSpinBox::valueChanged, this, [this](double value) {
         config.set(config.general.time_offset, value);
+        });
+    connect(TimeAutoAdjustCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        config.set(config.general.is_time_auto_adjust_enabled, checked);
+        TimeAutoAdjustSpinBox->setEnabled(checked);
+        });
+    connect(TimeAutoAdjustSpinBox, &QDoubleSpinBox::valueChanged, this, [this](double value) {
+        config.set(config.general.time_auto_adjust_seconds, value);
         });
     connect(ThemeComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
         config.set(config.general.theme, ThemeComboBox->itemData(index).toString());

@@ -178,7 +178,7 @@ QComboBox::drop-down, QDateTimeEdit::drop-down {
     width: @settings_dropdown_width;
     subcontrol-origin: border;
 }
-QSpinBox::up-button, QSpinBox::down-button, QTimeEdit::up-button, QTimeEdit::down-button {
+QSpinBox::up-button, QSpinBox::down-button, QDoubleSpinBox::up-button, QDoubleSpinBox::down-button, QTimeEdit::up-button, QTimeEdit::down-button {
     width: @settings_spin_button_width;
     subcontrol-origin: border;
 }
@@ -202,20 +202,20 @@ QCheckBox::indicator:disabled {
 QCheckBox::indicator:checked:disabled {
     background-color: gray;
 }
-QLineEdit, QComboBox, QSpinBox, QDateTimeEdit, QTextEdit, QPushButton {
+QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox, QDateTimeEdit, QTextEdit, QPushButton {
     background-color: rgba(255, 0, 0, 0.25);
     color: white;
     border: none;
     border-radius: @settings_radius;
     padding: @settings_padding;
 }
-QLineEdit:hover, QComboBox:hover, QSpinBox:hover, QDateTimeEdit:hover, QTextEdit:hover, QPushButton:hover {
+QLineEdit:hover, QComboBox:hover, QSpinBox:hover, QDoubleSpinBox:hover, QDateTimeEdit:hover, QTextEdit:hover, QPushButton:hover {
     background-color: rgba(255, 0, 0, 0.3);
 }
-QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDateTimeEdit:focus, QTextEdit:focus, QPushButton:pressed {
+QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDoubleSpinBox:focus, QDateTimeEdit:focus, QTextEdit:focus, QPushButton:pressed {
     background-color: rgba(255, 0, 0, 0.4);
 }
-QLineEdit:disabled, QComboBox:disabled, QSpinBox:disabled, QDateTimeEdit:disabled, QTextEdit:disabled, QPushButton:disabled {
+QLineEdit:disabled, QComboBox:disabled, QSpinBox:disabled, QDoubleSpinBox:disabled, QDateTimeEdit:disabled, QTextEdit:disabled, QPushButton:disabled {
     background-color: rgba(255, 0, 0, 0.1);
     color: gray;
 }
