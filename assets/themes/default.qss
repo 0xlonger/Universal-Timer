@@ -15,6 +15,9 @@
  *
  * 程序提供的变量（按屏幕大小或设置算出来，已带单位 px）：
  *   FloatingBar：      @floating_bar_radius（设置里的悬浮条圆角半径）、@floating_bar_height（悬浮条高度）
+ *                      @floating_bar_radius_top_left、_top_right、_bottom_left、_bottom_right（各个角的圆角半径，贴着屏幕边的角是 0px，用来做吸附在屏幕边上的样子）
+ *                      @floating_bar_border_style_top、_left、_right（这一侧贴着屏幕边时是 none，否则是 solid，写在 border-top-style 等里面）
+ *                      距顶边距离为 0 时贴着顶边；悬浮条在左上 / 右上时还贴着左边 / 右边。例子见 win11_attached.qss
  *   SettingsContent：  @settings_radius、@settings_padding、@settings_dropdown_width、@settings_spin_button_width、@settings_checkbox_size
  *   SettingsNav：      @nav_font_size、@nav_padding
  *

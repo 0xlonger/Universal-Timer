@@ -236,6 +236,7 @@ void SettingsContentClass::connectEmissions() {
         });
     connect(FloatingBarPositionComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
         config.set(config.floating_bar.floating_bar_position, index == 0 ? FloatingBarPosition::TopLeft : (index == 1 ? FloatingBarPosition::TopCenter : FloatingBarPosition::TopRight));
+        FloatingBar->applyTheme(config.floating_bar.floating_bar_border_radius, config.floating_bar.floating_bar_height); // 吸附式主题贴边的角跟着位置变
         });
     connect(FloatingBarHeightSpinBox, &QSpinBox::valueChanged, this, [this](int value) {
         config.set(config.floating_bar.floating_bar_height, value);
@@ -252,6 +253,7 @@ void SettingsContentClass::connectEmissions() {
         });
     connect(FloatingBarTopMarginSpinBox, &QSpinBox::valueChanged, this, [this](int value) {
         config.set(config.floating_bar.floating_bar_top_margin, value);
+        FloatingBar->applyTheme(config.floating_bar.floating_bar_border_radius, config.floating_bar.floating_bar_height); // 吸附式主题离开顶边后上面的角变回圆角
         });
     connect(FloatingBarOpacitySpinBox, &QSpinBox::valueChanged, this, [this](int value) {
         config.set(config.floating_bar.floating_bar_opacity, value);

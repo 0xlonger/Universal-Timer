@@ -21,7 +21,7 @@ public:
 
     QLabel* Bar;
 
-    void applyTheme(unsigned radius, unsigned height); // 按当前主题设置悬浮条样式和阴影
+    void applyTheme(unsigned radius, unsigned height); // 按当前主题设置悬浮条样式和阴影（还要用到配置里的位置和距顶边距离，改了它们也要调用）
     QMargins shadowMargins(FloatingBarPosition position, unsigned topMargin) const; // 阴影画在 Bar 外面，窗口四周要留出的位置（贴着屏幕边的一侧不留）
     void updateWindowFlags(); // 按配置更新窗口层级和点击穿透
     void updateOpacity(); // 按配置更新不透明度（平时 / 鼠标移入时淡化）
