@@ -213,13 +213,13 @@ void SettingsContentClass::connectEmissions() {
 
     // FloatingBar
     connect(IsShowFloatingBarCheckBox, &QCheckBox::checkStateChanged, this, [this] {
-        config.set(config.floating_bar.is_show_floating_bar, IsShowFloatingBarCheckBox->isChecked());
-        FloatingBar->updateVisibility();
+        FloatingBar->setShowFloatingBar(IsShowFloatingBarCheckBox->isChecked());
         for (QWidget* child : FloatingBarSettingsPage->findChildren<QWidget*>())
             if (child != IsShowFloatingBarCheckBox)
                 child->setEnabled(config.floating_bar.is_show_floating_bar);
         updateHideModeWidgets();
         });
+    connect(FloatingBar, &FloatingBarClass::showFloatingBarChanged, IsShowFloatingBarCheckBox, &QCheckBox::setChecked); // 在托盘菜单里隐藏 / 显示了悬浮条
     connect(FloatingBarTextLineEdit, &QLineEdit::textChanged, this, [this](const QString& text) {
         config.set(config.floating_bar.floating_bar_text, text);
         });

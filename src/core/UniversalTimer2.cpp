@@ -10,6 +10,7 @@
 #include <QProcess>
 #include <QScreen>
 #include <QMenu>
+#include <QSignalBlocker>
 
 UniversalTimer2::UniversalTimer2(QObject* parent)
     : QObject(parent)
@@ -43,6 +44,16 @@ UniversalTimer2::UniversalTimer2(QObject* parent)
     TrayIcon->setToolTip(tr("万能倒计时"));
     TrayIcon->setContextMenu(new QMenu(tr("万能倒计时")));
     TrayIcon->contextMenu()->addAction(tr("设置中心"), FullscreenPages, &FullscreenPagesManager::showSettings); // 系统托盘菜单项：设置
+    // 系统托盘菜单项：隐藏悬浮条（和设置里的“是否显示悬浮条”是同一个开关，会保存，下次启动也隐藏；不影响事件点胶囊和全屏提醒）
+    QAction* hide_floating_bar_action = TrayIcon->contextMenu()->addAction(tr("隐藏悬浮条"));
+    hide_floating_bar_action->setCheckable(true);
+    connect(hide_floating_bar_action, &QAction::toggled, this, [this](bool checked) {
+        FloatingBar->setShowFloatingBar(!checked);
+        });
+    connect(TrayIcon->contextMenu(), &QMenu::aboutToShow, hide_floating_bar_action, [this, hide_floating_bar_action] {
+        const QSignalBlocker blocker(hide_floating_bar_action);
+        hide_floating_bar_action->setChecked(!config.floating_bar.is_show_floating_bar); // 设置里可能改过
+        });
     TrayIcon->contextMenu()->addAction(tr("赞助"), [this] {
         DonatePageClass* DonatePage = new DonatePageClass;
         DonatePage->setAttribute(Qt::WA_DeleteOnClose);

@@ -26,10 +26,12 @@ public:
     void updateWindowFlags(); // 按配置更新窗口层级和点击穿透
     void updateOpacity(); // 按配置更新不透明度（平时 / 鼠标移入时淡化）
     void updateVisibility(); // 按“是否显示悬浮条”和隐藏规则显示或隐藏悬浮条
+    void setShowFloatingBar(bool show); // 修改并保存“是否显示悬浮条”（设置中心的勾选框和托盘菜单的“隐藏悬浮条”是同一个开关）
     ForegroundWindowInfo lastForeignWindow() const { return m_lastForeignWindow; } // 最近一个不是万能倒计时自己的前台窗口
 
 Q_SIGNALS:
     void hideRulesEvaluated(); // 每次判断完隐藏规则（编辑界面用来刷新满足状态）
+    void showFloatingBarChanged(bool show); // “是否显示悬浮条”改了，另一处开关跟着更新
 
 protected:
 

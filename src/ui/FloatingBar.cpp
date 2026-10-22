@@ -210,3 +210,12 @@ void FloatingBarClass::updateVisibility()
     if (visible != this->isVisible())
         this->setVisible(visible);
 }
+
+void FloatingBarClass::setShowFloatingBar(bool show)
+{
+    if (show == config.floating_bar.is_show_floating_bar)
+        return;
+    config.set(config.floating_bar.is_show_floating_bar, show);
+    updateVisibility();
+    emit showFloatingBarChanged(show);
+}
