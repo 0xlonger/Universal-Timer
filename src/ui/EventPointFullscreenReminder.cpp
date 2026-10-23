@@ -3,6 +3,7 @@
     *  本文件由 Claude Opus 5.5 Extra 生成
 */
 #include "EventPointFullscreenReminder.h"
+#include "EventPointReminder.h"
 
 #include <QApplication>
 #include <QEasingCurve>
@@ -13,6 +14,7 @@
 #include <QRadialGradient>
 #include <QScreen>
 #include <QSoundEffect>
+#include <QTimer>
 #include <QVariantAnimation>
 #include <QtMath>
 
@@ -202,16 +204,35 @@ EventPointFullscreenReminder::EventPointFullscreenReminder(const EventPoint& eve
         });
 }
 
+// 新建的全屏窗口从 show() 到真正出现在屏幕上要一段时间（大的半透明窗口尤其慢）。
+// 如果这时倒数胶囊已经隐藏、时间轴已经开始走，胶囊会消失一下，收窄成红线的动画也会被跳过。
+// 所以先显示一帧全透明的窗口，等它画到屏幕上以后再画出 0 时刻、关掉胶囊、开始播放
 void EventPointFullscreenReminder::start()
 {
     m_t = 0;
+    m_waiting = true;
     this->show();
     this->raise();
+    QTimer::singleShot(1000, this, &EventPointFullscreenReminder::begin); // 万一一直没有画出来，也不会一直等
+}
+
+void EventPointFullscreenReminder::begin()
+{
+    if (!m_waiting)
+        return;
+    m_waiting = false;
+    this->repaint(); // 立刻画出 0 时刻（胶囊还在原处），再关掉胶囊窗口，两个窗口在同一帧里交接
+    for (QWidget* widget : QApplication::topLevelWidgets()) {
+        EventPointReminder* capsule = qobject_cast<EventPointReminder*>(widget);
+        if (capsule && capsule->isReached() && capsule->eventPoint().id() == m_eventPoint.id())
+            capsule->finish();
+    }
     m_timeline->start();
 }
 
 void EventPointFullscreenReminder::seek(qreal ms)
 {
+    m_waiting = false;
     m_timeline->stop();
     m_t = std::clamp<qreal>(ms, 0, m_end);
     this->update();
@@ -287,6 +308,11 @@ bool EventPointFullscreenReminder::isFlashing(qreal t) const
 void EventPointFullscreenReminder::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event);
+    if (m_waiting) {
+        // start() 之后的第一帧什么都不画；画完（已经交给屏幕）后在下一轮事件循环里开始播放
+        QTimer::singleShot(0, this, &EventPointFullscreenReminder::begin);
+        return;
+    }
     updateMetrics();
     const qreal t = m_t;
     if (t >= m_end) return;

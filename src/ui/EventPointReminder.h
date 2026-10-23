@@ -21,6 +21,10 @@ class EventPointReminder : public QLabel
 public:
     explicit EventPointReminder(QWidget* parent, const EventPoint& eventPoint);
 
+    const EventPoint& eventPoint() const { return m_eventPoint; }
+    bool isReached() const { return m_isReached; } // 已经倒数到 0，正在等全屏提醒接手
+    void finish(); // 关掉胶囊：全屏提醒已经在原处画出了胶囊（见 EventPointFullscreenReminder::begin）
+
 protected:
 
     void resizeEvent(QResizeEvent* event) override;
@@ -38,6 +42,7 @@ private:
     QLabel* m_label;
 
     const EventPoint m_eventPoint;
+    bool m_isReached = false;
     QTimer* m_timer;
     QPropertyAnimation* m_animation;
     QGraphicsOpacityEffect* m_opacityEffect;
