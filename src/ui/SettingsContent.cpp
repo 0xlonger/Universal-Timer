@@ -48,10 +48,30 @@ void SettingsContentClass::initializeObjects() {
     TargetDateTimeEdit->setCalendarPopup(true);
     TargetDateTimeEdit->setDisplayFormat("yyyy-MM-dd HH:mm:ss"); // 设置显示格式
     LanguageComboBox = new QComboBox(GeneralSettingsPage);
+    for (const auto& [code, name] : AVAILABLE_LANGUAGES)
+        LanguageComboBox->addItem(name, code);
+    LanguageComboBox->setCurrentIndex(qMax(0, LanguageComboBox->findData(config.general.language)));
     ThemeComboBox = new QComboBox(GeneralSettingsPage);
     for (const ThemeManager::ThemeInfo& theme : ThemeManager::instance().themes())
         ThemeComboBox->addItem(theme.name, theme.id);
     ThemeComboBox->setCurrentIndex(qMax(0, ThemeComboBox->findData(ThemeManager::instance().currentId())));
+    TimeOffsetSpinBox = new QDoubleSpinBox(GeneralSettingsPage);
+    TimeOffsetSpinBox->setDecimals(3);
+    TimeOffsetSpinBox->setRange(-86399.999, 86399.999);
+    TimeOffsetSpinBox->setValue(config.general.time_offset);
+    TimeOffsetSpinBox->setSuffix(tr(" 秒（正数让提醒提前，负数推后）")); // 时间偏移后缀文本
+    TimeOffsetSpinBox->setToolTip(tr("和 ClassIsland 的时间偏移一样，用来对齐学校的铃声：铃声比电脑时间快几秒就填几，慢几秒就填负几。\n只影响事件点和定时全屏提醒，悬浮条上的倒计时不变。"));
+    TimeAutoAdjustCheckBox = new QCheckBox(tr("每天自动调整时间偏移"), GeneralSettingsPage);
+    TimeAutoAdjustCheckBox->setChecked(config.general.is_time_auto_adjust_enabled);
+    TimeAutoAdjustCheckBox->setToolTip(tr("和 ClassIsland 的自动时间偏移一样：开启后每过一天，时间偏移自动加上下面设定的增量。\n用来抵消学校铃声每天慢慢跑偏，比如铃声每天比电脑多快 0.3 秒，就填 0.3。"));
+    TimeAutoAdjustSpinBox = new QDoubleSpinBox(GeneralSettingsPage);
+    TimeAutoAdjustSpinBox->setDecimals(3);
+    TimeAutoAdjustSpinBox->setRange(-3600, 3600);
+    TimeAutoAdjustSpinBox->setSingleStep(0.1);
+    TimeAutoAdjustSpinBox->setValue(config.general.time_auto_adjust_seconds);
+    TimeAutoAdjustSpinBox->setPrefix(tr("时间偏移每天加 ")); // 自动时间偏移增量前缀文本
+    TimeAutoAdjustSpinBox->setSuffix(tr(" 秒")); // 自动时间偏移增量后缀文本
+    TimeAutoAdjustSpinBox->setEnabled(config.general.is_time_auto_adjust_enabled);
 
     // Floating Bar
     IsShowFloatingBarCheckBox = new QCheckBox(tr("是否显示悬浮条"), FloatingBarSettingsPage);
@@ -139,6 +159,9 @@ void SettingsContentClass::initializeObjects() {
     GeneralSettingsPageLayout->addRow(tr("目标时间："), TargetDateTimeEdit);
     GeneralSettingsPageLayout->addRow(tr("语言："), LanguageComboBox);
     GeneralSettingsPageLayout->addRow(tr("主题："), ThemeComboBox);
+    GeneralSettingsPageLayout->addRow(tr("时间偏移："), TimeOffsetSpinBox);
+    GeneralSettingsPageLayout->addRow(TimeAutoAdjustCheckBox);
+    GeneralSettingsPageLayout->addRow(TimeAutoAdjustSpinBox);
     GeneralSettingsPageLayout->setContentsMargins(25, 25, 25, 25);
     GeneralSettingsPage->setLayout(GeneralSettingsPageLayout);
 
@@ -196,6 +219,19 @@ void SettingsContentClass::connectEmissions() {
         config.set(config.general.target_date_time, date_time);
         });
     // todo)) update_interval...
+    connect(LanguageComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
+        config.set(config.general.language, LanguageComboBox->itemData(index).toString());
+        });
+    connect(TimeOffsetSpinBox, &QDoubleSpinBox::valueChanged, this, [this](double value) {
+        config.set(config.general.time_offset, value);
+        });
+    connect(TimeAutoAdjustCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        config.set(config.general.is_time_auto_adjust_enabled, checked);
+        TimeAutoAdjustSpinBox->setEnabled(checked);
+        });
+    connect(TimeAutoAdjustSpinBox, &QDoubleSpinBox::valueChanged, this, [this](double value) {
+        config.set(config.general.time_auto_adjust_seconds, value);
+        });
     connect(ThemeComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
         config.set(config.general.theme, ThemeComboBox->itemData(index).toString());
         ThemeManager::instance().load(config.general.theme);
@@ -204,13 +240,13 @@ void SettingsContentClass::connectEmissions() {
 
     // FloatingBar
     connect(IsShowFloatingBarCheckBox, &QCheckBox::checkStateChanged, this, [this] {
-        config.set(config.floating_bar.is_show_floating_bar, IsShowFloatingBarCheckBox->isChecked());
-        FloatingBar->updateVisibility();
+        FloatingBar->setShowFloatingBar(IsShowFloatingBarCheckBox->isChecked());
         for (QWidget* child : FloatingBarSettingsPage->findChildren<QWidget*>())
             if (child != IsShowFloatingBarCheckBox)
                 child->setEnabled(config.floating_bar.is_show_floating_bar);
         updateHideModeWidgets();
         });
+    connect(FloatingBar, &FloatingBarClass::showFloatingBarChanged, IsShowFloatingBarCheckBox, &QCheckBox::setChecked); // 在托盘菜单里隐藏 / 显示了悬浮条
     connect(FloatingBarTextLineEdit, &QLineEdit::textChanged, this, [this](const QString& text) {
         config.set(config.floating_bar.floating_bar_text, text);
         });
@@ -227,6 +263,7 @@ void SettingsContentClass::connectEmissions() {
         });
     connect(FloatingBarPositionComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
         config.set(config.floating_bar.floating_bar_position, index == 0 ? FloatingBarPosition::TopLeft : (index == 1 ? FloatingBarPosition::TopCenter : FloatingBarPosition::TopRight));
+        FloatingBar->applyTheme(config.floating_bar.floating_bar_border_radius, config.floating_bar.floating_bar_height); // 吸附式主题贴边的角跟着位置变
         });
     connect(FloatingBarHeightSpinBox, &QSpinBox::valueChanged, this, [this](int value) {
         config.set(config.floating_bar.floating_bar_height, value);
@@ -243,6 +280,7 @@ void SettingsContentClass::connectEmissions() {
         });
     connect(FloatingBarTopMarginSpinBox, &QSpinBox::valueChanged, this, [this](int value) {
         config.set(config.floating_bar.floating_bar_top_margin, value);
+        FloatingBar->applyTheme(config.floating_bar.floating_bar_border_radius, config.floating_bar.floating_bar_height); // 吸附式主题离开顶边后上面的角变回圆角
         });
     connect(FloatingBarOpacitySpinBox, &QSpinBox::valueChanged, this, [this](int value) {
         config.set(config.floating_bar.floating_bar_opacity, value);

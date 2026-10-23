@@ -24,6 +24,11 @@ void ConfigManager::read() {
         general.update_interval = Settings.value("update_interval", 1000).toInt();
         general.language = Settings.value("language", "zh-CN").toString();
         general.theme = Settings.value("theme", "default").toString();
+        general.time_offset = Settings.value("time_offset", 0).toDouble();
+        general.is_time_auto_adjust_enabled = Settings.value("is_time_auto_adjust_enabled", false).toBool();
+        general.time_auto_adjust_seconds = Settings.value("time_auto_adjust_seconds", 0).toDouble();
+        general.last_time_adjust_date = QDate::fromString(Settings.value("last_time_adjust_date").toString(), Qt::ISODate);
+        general.is_onboarding_finished = Settings.value("is_onboarding_finished", true).toBool();
         Settings.endGroup();
 
         Settings.beginGroup("floating_bar");
@@ -105,6 +110,11 @@ void ConfigManager::write() {
     Settings.setValue("update_interval", general.update_interval);
     Settings.setValue("language", general.language);
     Settings.setValue("theme", general.theme);
+    Settings.setValue("time_offset", general.time_offset);
+    Settings.setValue("is_time_auto_adjust_enabled", general.is_time_auto_adjust_enabled);
+    Settings.setValue("time_auto_adjust_seconds", general.time_auto_adjust_seconds);
+    Settings.setValue("last_time_adjust_date", general.last_time_adjust_date.toString(Qt::ISODate));
+    Settings.setValue("is_onboarding_finished", general.is_onboarding_finished);
     Settings.endGroup();
 
     Settings.beginGroup("floating_bar");

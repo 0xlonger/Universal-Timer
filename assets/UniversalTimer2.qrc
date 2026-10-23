@@ -6,5 +6,6 @@
         <file>images/theme/checkmark.png</file>
         <file>themes/default.qss</file>
         <file>themes/win11.qss</file>
+        <file>themes/win11_attached.qss</file>
     </qresource>
 </RCC>

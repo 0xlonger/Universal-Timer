@@ -1,15 +1,15 @@
 /*
  * 万能倒计时主题文件：Win11
  *
- * 只把悬浮条的背景换成仿 Win11 的样式（参考 ClassIsland 的 Fluent 主题）：纯色底、1px 描边（底边稍深）、圆角和阴影，
+ * 只把悬浮条的背景换成仿 Win11 的样式（参考 ClassIsland 的 Fluent 主题）：半透明底、1px 描边（底边稍深）、圆角和阴影，
  * 文字不变，跟随系统深浅色。其他部分没有写，使用默认主题。写法见 default.qss 开头的说明。
  */
 
 @name Win11;
 
-/* 底色：WinUI 的 SolidBackgroundFillColorSecondary */
-@var bar_background = rgb(238, 238, 238);
-@var-dark bar_background = rgb(28, 28, 28);
+/* 底色：WinUI 的 SolidBackgroundFillColorSecondary，不透明度 75%（和默认主题的白底一样） */
+@var bar_background = rgba(238, 238, 238, 0.75);
+@var-dark bar_background = rgba(28, 28, 28, 0.75);
 
 /* 描边：WinUI 的 ControlElevationBorderBrush，底边稍深 */
 @var bar_border = rgba(0, 0, 0, 0.06);

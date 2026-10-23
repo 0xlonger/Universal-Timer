@@ -29,6 +29,11 @@ private:
         unsigned update_interval = 1000; // 更新间隔时间，默认1秒
         QString language = "zh-CN"; // 语言，默认中文
         QString theme = "default"; // 主题（themes 文件夹里的文件名，不含 .qss），默认“默认”主题
+        bool is_onboarding_finished = true; // 是否走完了第一次打开时的引导（第一次打开时设为 false；以前的版本没有这一项，算走完了）
+        double time_offset = 0; // 时间偏移（秒，精确到 0.001），事件点和定时全屏提醒按“当前时间 + 偏移”判断，正数提前、负数推后，默认0
+        bool is_time_auto_adjust_enabled = false; // 自动时间偏移：每天自动把时间偏移加上 time_auto_adjust_seconds，默认关闭
+        double time_auto_adjust_seconds = 0; // 自动时间偏移每天的增量（秒，精确到 0.001）
+        QDate last_time_adjust_date; // 上次按天调整时间偏移的日期（不管开没开自动时间偏移，每天都会更新）
     };
 
     struct FloatingBarConfigItems {

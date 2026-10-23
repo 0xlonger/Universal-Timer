@@ -15,6 +15,9 @@
  *
  * 程序提供的变量（按屏幕大小或设置算出来，已带单位 px）：
  *   FloatingBar：      @floating_bar_radius（设置里的悬浮条圆角半径）、@floating_bar_height（悬浮条高度）
+ *                      @floating_bar_radius_top_left、_top_right、_bottom_left、_bottom_right（各个角的圆角半径，贴着屏幕边的角是 0px，用来做吸附在屏幕边上的样子）
+ *                      @floating_bar_border_style_top、_left、_right（这一侧贴着屏幕边时是 none，否则是 solid，写在 border-top-style 等里面）
+ *                      距顶边距离为 0 时贴着顶边；悬浮条在左上 / 右上时还贴着左边 / 右边。例子见 win11_attached.qss
  *   SettingsContent：  @settings_radius、@settings_padding、@settings_dropdown_width、@settings_spin_button_width、@settings_checkbox_size
  *   SettingsNav：      @nav_font_size、@nav_padding
  *
@@ -113,6 +116,17 @@ QScrollBar::handle:vertical { background: rgba(255, 0, 0, 0.5); min-height: 30px
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; }
 QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: none; }
 
+/* 第一次打开时的引导（输入框、按钮等控件沿用 SettingsContent 的样式，可以用 @settings_radius 等变量） */
+@section OnboardingWizard
+QStackedWidget { border: none; }
+#OnboardingStepNumber { color: red; }
+#OnboardingSubtitle { color: rgb(170, 160, 160); }
+#OnboardingLanguage { color: red; }
+#OnboardingNextButton { background-color: rgba(255, 0, 0, 0.55); }
+#OnboardingNextButton:hover { background-color: rgba(255, 0, 0, 0.7); }
+#OnboardingNextButton:pressed { background-color: rgba(255, 0, 0, 0.85); }
+#OnboardingPreviewDesk { background-color: rgb(20, 32, 44); border-radius: @settings_radius; }
+
 /* 设置中心右侧的设置项 */
 @section SettingsContent
 QWidget {
@@ -164,7 +178,7 @@ QComboBox::drop-down, QDateTimeEdit::drop-down {
     width: @settings_dropdown_width;
     subcontrol-origin: border;
 }
-QSpinBox::up-button, QSpinBox::down-button, QTimeEdit::up-button, QTimeEdit::down-button {
+QSpinBox::up-button, QSpinBox::down-button, QDoubleSpinBox::up-button, QDoubleSpinBox::down-button, QTimeEdit::up-button, QTimeEdit::down-button {
     width: @settings_spin_button_width;
     subcontrol-origin: border;
 }
@@ -188,20 +202,20 @@ QCheckBox::indicator:disabled {
 QCheckBox::indicator:checked:disabled {
     background-color: gray;
 }
-QLineEdit, QComboBox, QSpinBox, QDateTimeEdit, QTextEdit, QPushButton {
+QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox, QDateTimeEdit, QTextEdit, QPushButton {
     background-color: rgba(255, 0, 0, 0.25);
     color: white;
     border: none;
     border-radius: @settings_radius;
     padding: @settings_padding;
 }
-QLineEdit:hover, QComboBox:hover, QSpinBox:hover, QDateTimeEdit:hover, QTextEdit:hover, QPushButton:hover {
+QLineEdit:hover, QComboBox:hover, QSpinBox:hover, QDoubleSpinBox:hover, QDateTimeEdit:hover, QTextEdit:hover, QPushButton:hover {
     background-color: rgba(255, 0, 0, 0.3);
 }
-QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDateTimeEdit:focus, QTextEdit:focus, QPushButton:pressed {
+QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDoubleSpinBox:focus, QDateTimeEdit:focus, QTextEdit:focus, QPushButton:pressed {
     background-color: rgba(255, 0, 0, 0.4);
 }
-QLineEdit:disabled, QComboBox:disabled, QSpinBox:disabled, QDateTimeEdit:disabled, QTextEdit:disabled, QPushButton:disabled {
+QLineEdit:disabled, QComboBox:disabled, QSpinBox:disabled, QDoubleSpinBox:disabled, QDateTimeEdit:disabled, QTextEdit:disabled, QPushButton:disabled {
     background-color: rgba(255, 0, 0, 0.1);
     color: gray;
 }

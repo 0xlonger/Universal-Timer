@@ -58,23 +58,45 @@ FloatingBarClass::~FloatingBarClass()
 
 void FloatingBarClass::applyTheme(unsigned radius, unsigned height)
 {
+    styleBar(Bar, m_shadowEffect, radius, height, config.floating_bar.floating_bar_position, config.floating_bar.floating_bar_top_margin);
+}
+
+void FloatingBarClass::styleBar(QLabel* bar, QGraphicsDropShadowEffect* shadowEffect, unsigned radius, unsigned height, FloatingBarPosition position, unsigned topMargin)
+{
     ThemeManager& theme = ThemeManager::instance();
-    Bar->setStyleSheet(theme.style("FloatingBar", {
-        { "floating_bar_radius", QString::number(radius) + "px" },
+    // 悬浮条贴着屏幕的哪几条边（距顶边距离为 0 时贴着顶边，放在左上 / 右上时还贴着左边 / 右边），吸附式的主题用来把贴边的角变成直角、不画贴边一侧的描边
+    const bool touchTop = topMargin == 0;
+    const bool touchLeft = position == FloatingBarPosition::TopLeft;
+    const bool touchRight = position == FloatingBarPosition::TopRight;
+    const QString r = QString::number(radius) + "px";
+    bar->setStyleSheet(theme.style("FloatingBar", {
+        { "floating_bar_radius", r },
         { "floating_bar_height", QString::number(height) + "px" },
+        { "floating_bar_radius_top_left", touchTop || touchLeft ? "0px" : r },
+        { "floating_bar_radius_top_right", touchTop || touchRight ? "0px" : r },
+        { "floating_bar_radius_bottom_left", touchLeft ? "0px" : r },
+        { "floating_bar_radius_bottom_right", touchRight ? "0px" : r },
+        { "floating_bar_border_style_top", touchTop ? "none" : "solid" },
+        { "floating_bar_border_style_left", touchLeft ? "none" : "solid" },
+        { "floating_bar_border_style_right", touchRight ? "none" : "solid" },
         }));
 
     // QSS 不支持阴影，由主题变量决定是否画阴影
     const QColor shadowColor = parseThemeColor(theme.variable("floating_bar_shadow_color"));
     if (shadowColor.isValid() && shadowColor.alpha() > 0) {
-        m_shadowEffect->setColor(shadowColor);
-        m_shadowEffect->setBlurRadius(theme.variable("floating_bar_shadow_blur").toDouble());
-        m_shadowEffect->setOffset(theme.variable("floating_bar_shadow_offset_x").toDouble(), theme.variable("floating_bar_shadow_offset_y").toDouble());
-        m_shadowEffect->setEnabled(true);
+        shadowEffect->setColor(shadowColor);
+        shadowEffect->setBlurRadius(theme.variable("floating_bar_shadow_blur").toDouble());
+        shadowEffect->setOffset(theme.variable("floating_bar_shadow_offset_x").toDouble(), theme.variable("floating_bar_shadow_offset_y").toDouble());
+        shadowEffect->setEnabled(true);
     }
     else {
-        m_shadowEffect->setEnabled(false);
+        shadowEffect->setEnabled(false);
     }
+}
+
+QString FloatingBarClass::barText(const QString& text, qint64 leftSeconds)
+{
+    return " " + text + QString::number(leftSeconds / 86400) + tr("天", "Floating Bar") + QString::number((leftSeconds % 86400) / 3600) + tr("时") + QString::number((leftSeconds % 3600) / 60) + tr("分") + QString::number(leftSeconds % 60) + tr("秒 ");
 }
 
 QMargins FloatingBarClass::shadowMargins(FloatingBarPosition position, unsigned topMargin) const
@@ -194,7 +216,22 @@ void FloatingBarClass::evaluateHideRules()
 
 void FloatingBarClass::updateVisibility()
 {
-    const bool visible = config.floating_bar.is_show_floating_bar && !m_isHiddenByRule;
+    const bool visible = config.floating_bar.is_show_floating_bar && !m_isHiddenByRule && !m_isHiddenForOnboarding;
     if (visible != this->isVisible())
         this->setVisible(visible);
+}
+
+void FloatingBarClass::setHiddenForOnboarding(bool hidden)
+{
+    m_isHiddenForOnboarding = hidden;
+    updateVisibility();
+}
+
+void FloatingBarClass::setShowFloatingBar(bool show)
+{
+    if (show == config.floating_bar.is_show_floating_bar)
+        return;
+    config.set(config.floating_bar.is_show_floating_bar, show);
+    updateVisibility();
+    emit showFloatingBarChanged(show);
 }

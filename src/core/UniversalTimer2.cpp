@@ -10,6 +10,9 @@
 #include <QProcess>
 #include <QScreen>
 #include <QMenu>
+#include <QSignalBlocker>
+
+#include <cmath>
 
 UniversalTimer2::UniversalTimer2(QObject* parent)
     : QObject(parent)
@@ -32,6 +35,9 @@ UniversalTimer2::UniversalTimer2(QObject* parent)
     FullscreenPages = new FullscreenPagesManager(nullptr, config, FloatingBar);
     FullscreenPages->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool);
     FullscreenPages->resize(desktop.size());
+    connect(FullscreenPages, &FullscreenPagesManager::onboardingFinished, this, [this] {
+        FloatingBar->setHiddenForOnboarding(false); // 引导走完，显示悬浮条
+        });
 
     // About Page
     AboutPage = new AboutPageClass;
@@ -43,6 +49,16 @@ UniversalTimer2::UniversalTimer2(QObject* parent)
     TrayIcon->setToolTip(tr("万能倒计时"));
     TrayIcon->setContextMenu(new QMenu(tr("万能倒计时")));
     TrayIcon->contextMenu()->addAction(tr("设置中心"), FullscreenPages, &FullscreenPagesManager::showSettings); // 系统托盘菜单项：设置
+    // 系统托盘菜单项：隐藏悬浮条（和设置里的“是否显示悬浮条”是同一个开关，会保存，下次启动也隐藏；不影响事件点胶囊和全屏提醒）
+    QAction* hide_floating_bar_action = TrayIcon->contextMenu()->addAction(tr("隐藏悬浮条"));
+    hide_floating_bar_action->setCheckable(true);
+    connect(hide_floating_bar_action, &QAction::toggled, this, [this](bool checked) {
+        FloatingBar->setShowFloatingBar(!checked);
+        });
+    connect(TrayIcon->contextMenu(), &QMenu::aboutToShow, hide_floating_bar_action, [this, hide_floating_bar_action] {
+        const QSignalBlocker blocker(hide_floating_bar_action);
+        hide_floating_bar_action->setChecked(!config.floating_bar.is_show_floating_bar); // 设置里可能改过
+        });
     TrayIcon->contextMenu()->addAction(tr("赞助"), [this] {
         DonatePageClass* DonatePage = new DonatePageClass;
         DonatePage->setAttribute(Qt::WA_DeleteOnClose);
@@ -85,6 +101,13 @@ UniversalTimer2::UniversalTimer2(QObject* parent)
         scheduleNextUpdate();
         });
     scheduleNextUpdate();
+    reminder_timer.setSingleShot(true);
+    reminder_timer.setTimerType(Qt::PreciseTimer);
+    connect(&reminder_timer, &QTimer::timeout, this, [this] {
+        checkReminders();
+        scheduleNextReminderCheck();
+        });
+    scheduleNextReminderCheck();
 
 }
 
@@ -105,10 +128,16 @@ void UniversalTimer2::refresh() {
     left_time = QDateTime::currentDateTime().secsTo(config.general.target_date_time);
 
     if (!QFile::exists("config.ini")) {
-        FullscreenPages->showWelcome();
+        config.general.is_onboarding_finished = false; // 第一次打开，要走一遍引导
         config.write();
     }
     else config.read();
+    applyTimeAutoAdjust();
+    // 引导没走完（第一次打开，或者上次走到一半就关了）：显示引导，走完之前不显示悬浮条
+    if (!config.general.is_onboarding_finished) {
+        FloatingBar->setHiddenForOnboarding(true);
+        FullscreenPages->showWelcome();
+    }
 
     // Theme：重新读取主题文件，改了主题文件后点“刷新”即可生效
     ThemeManager::instance().load(config.general.theme);
@@ -135,7 +164,7 @@ void UniversalTimer2::refresh() {
 // 悬浮条更新函数
 void UniversalTimer2::updateFloatingBar() {
     // 更新标签文本
-    FloatingBar->Bar->setText(" " + config.floating_bar.floating_bar_text + QString::number(left_time / 86400) + tr("天", "Floating Bar") + QString::number((left_time % 86400) / 3600) + tr("时") + QString::number((left_time % 3600) / 60) + tr("分") + QString::number(left_time % 60) + tr("秒 "));
+    FloatingBar->Bar->setText(FloatingBarClass::barText(config.floating_bar.floating_bar_text, left_time));
 
     // 更新大小
     FloatingBar->Bar->adjustSize();
@@ -170,23 +199,56 @@ void UniversalTimer2::scheduleNextUpdate() {
     timer.start(interval - now % interval + 50);
 }
 
+// 安排下一次检查提醒：和 scheduleNextUpdate 一样避开整秒，但对齐的是加上时间偏移后的整秒（偏移有小数时，提醒要在偏移后的整秒触发）
+void UniversalTimer2::scheduleNextReminderCheck() {
+    const int interval = qMax(1, int(config.general.update_interval));
+    const int now = offsetTime().msecsSinceStartOfDay();
+    reminder_timer.start(interval - now % interval + 50);
+}
+
+// 加上时间偏移后的当前时间，时间偏移用来对齐学校的铃声（正数提前、负数推后）
+QTime UniversalTimer2::offsetTime() const {
+    return QTime::currentTime().addMSecs(int(qRound64(config.general.time_offset * 1000)));
+}
+
+// 自动时间偏移（和 ClassIsland 一样）：开启时每过一天，时间偏移加上设定的增量
+// 启动时补上没开程序那几天的量；程序开着过了零点也会加。不管开没开，都记下今天已经算过，免得刚打开开关时把以前的天数也算进去
+void UniversalTimer2::applyTimeAutoAdjust() {
+    const QDate today = QDate::currentDate();
+    const QDate last = config.general.last_time_adjust_date;
+    if (last == today)
+        return;
+    const qint64 days = last.isValid() ? last.daysTo(today) : 0;
+    if (config.general.is_time_auto_adjust_enabled && days > 0) {
+        const double offset = config.general.time_offset + config.general.time_auto_adjust_seconds * days;
+        config.general.time_offset = qBound(-86399.999, std::round(offset * 1000) / 1000, 86399.999);
+        qInfo() << "自动时间偏移：过了" << days << "天，时间偏移调整为" << config.general.time_offset << "秒";
+    }
+    config.set(config.general.last_time_adjust_date, today);
+}
+
 // 更新函数
 void UniversalTimer2::updateObjects() {
     left_time = QDateTime::currentDateTime().secsTo(config.general.target_date_time);
     if (config.floating_bar.is_show_floating_bar) {
         updateFloatingBar();
     }
+}
+
+// 检查提醒：定时全屏提醒和事件点按加上时间偏移后的时间判断
+void UniversalTimer2::checkReminders() {
+    applyTimeAutoAdjust(); // 开着程序过了零点
+    const QTime offset_time = offsetTime();
+    const QTime current_time(offset_time.hour(), offset_time.minute(), offset_time.second());
     // 定时显示全屏提醒
     if (config.reminder.is_show_reminder) {
-        QTime current_time = QTime::currentTime();
-        if (config.reminder.reminder_time_list.contains(QTime(current_time.hour(), current_time.minute(), current_time.second()))) {
+        if (config.reminder.reminder_time_list.contains(current_time)) {
             FullscreenPages->showReminder();
         }
     }
     // 定时显示事件点提醒
     for (EventPoint& event_point_item : config.event_point.event_point_list) {
-        QTime current_time = QTime::currentTime();
-        if (QTime(current_time.hour(), current_time.minute(), current_time.second()) == event_point_item.time().addSecs(-event_point_item.advanceTime() - 1) && !event_point_item.isShowing()) {
+        if (current_time == event_point_item.time().addSecs(-event_point_item.advanceTime() - 1) && !event_point_item.isShowing()) {
             event_point_item.setShowing(true);
             EventPointReminder* event_point_reminder = new EventPointReminder(nullptr, event_point_item);
             event_point_reminder->setAttribute(Qt::WA_DeleteOnClose);

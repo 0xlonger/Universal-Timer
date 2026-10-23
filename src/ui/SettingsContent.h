@@ -14,6 +14,7 @@
 #include <QDateTimeEdit>
 #include <QComboBox>
 #include <QSpinBox>
+#include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QResizeEvent>
 
@@ -69,6 +70,9 @@ private:
     QDateTimeEdit* TargetDateTimeEdit;
     QComboBox* LanguageComboBox;
     QComboBox* ThemeComboBox;
+    QDoubleSpinBox* TimeOffsetSpinBox;
+    QCheckBox* TimeAutoAdjustCheckBox;
+    QDoubleSpinBox* TimeAutoAdjustSpinBox;
 
     // Floating Bar
     QCheckBox* IsShowFloatingBarCheckBox;
