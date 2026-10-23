@@ -36,7 +36,7 @@ public:
                                           int flashTimes = 4,
                                           QWidget* parent = nullptr);
 
-    void start();                 // 显示并从 0 开始播放
+    void start();                 // 显示窗口，窗口真正出现在屏幕上以后从 0 开始播放（见 begin()）
     void seek(qreal ms);          // 停在某一时刻（预览、截图用）
     qreal totalDuration() const;  // 从 0 到完全淡出的时长
 
@@ -54,6 +54,7 @@ private:
         QString name;
     };
 
+    void begin();                 // 窗口已经画到屏幕上：画出 0 时刻、关掉倒数胶囊、开始播放
     void updateMetrics();
     Layout layout() const;
     QRectF capsuleRect() const;
@@ -76,6 +77,7 @@ private:
     int m_flashTimes;
 
     qreal m_t = 0;            // 当前时刻（毫秒）
+    bool m_waiting = false;   // start() 之后、窗口第一次画到屏幕上之前
     qreal m_exit = 0;         // 开始收尾的时刻
     qreal m_end = 0;          // 完全淡出的时刻
 

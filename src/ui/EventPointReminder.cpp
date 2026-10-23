@@ -136,9 +136,11 @@ void EventPointReminder::updateLabel()
     if (remainingSeconds <= 0) {
         // 到达事件点：把胶囊当前位置交给全屏提醒，红线从这里开始
         m_timer->stop();
+        m_isReached = true;
         emit reached(m_eventPoint, this->geometry());
-        this->hide();
-        this->deleteLater();
+        // 先不隐藏：新的全屏提醒窗口要过一会儿才真正出现在屏幕上，这里马上隐藏的话胶囊会消失一下。
+        // 全屏提醒在原处画出胶囊后会调用 finish() 关掉胶囊；万一没有全屏提醒接手，1 秒后自己关掉
+        QTimer::singleShot(1000, this, &EventPointReminder::finish);
         return;
     }
     m_label->setText(QString::number(remainingSeconds));
@@ -152,6 +154,12 @@ void EventPointReminder::updateLabel()
     m_adjustAnimation->start();
     m_countdownGroup->stop();
     m_countdownGroup->start();
+}
+
+void EventPointReminder::finish()
+{
+    this->hide();
+    this->deleteLater();
 }
 
 void EventPointReminder::resizeEvent(QResizeEvent* event)
